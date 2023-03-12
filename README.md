@@ -2,6 +2,8 @@
 
 Chrome Extension : Price Hitory Graph for Japanese Amazon Kindle Books
 
+<img src="https://www.listasin.net/api/img/chex-kiseppe-1280x800.jpg" width="640" height="400">
+
 ## 概要
 
 キセッペ (Kiseppe) とは、
