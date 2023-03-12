@@ -13,7 +13,7 @@ Chrome にブラウザ拡張機能がインストールされると、
 拡張機能は日本のアマゾンのキンドル書籍ページに価格推移グラフを直接表示します。
 また、セール対象作品の場合はキンセリのセールまとめページへのリンクも表示します。
 
-## Overview
+## Overview (machine translation)
 
 Kiseppe is a Chrome extension for Kindle sale information site "Kinseri".
 
