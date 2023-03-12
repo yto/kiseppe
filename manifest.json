@@ -1,0 +1,17 @@
+{
+    "name": "キセッペ Kiseppe",
+    "description": "Kindle本の価格推移グラフを表示します (amazon.co.jp のみ対応)",
+    "version": "1.0",
+    "homepage_url": "https://yapi.ta2o.net/kndlsl/",
+    "manifest_version": 3,
+    "permissions": ["activeTab", "scripting", "storage"],
+    "action": {
+	"default_icon": "icon-16.png"
+    },
+    "content_scripts": [
+	{
+	    "matches": ["https://www.amazon.co.jp/*"],
+	    "js": ["content-script.js"]
+	}
+    ]
+}
