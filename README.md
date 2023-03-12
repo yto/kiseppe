@@ -9,13 +9,12 @@ Chrome Extension : Price Hitory Graph for Japanese Amazon Kindle Books
 キセッペ (Kiseppe) とは、
 Kindle セール情報サイト「キンセリ」のブラウザ拡張機能です。
 
-Chrome にインストールされると、
 キセッペはアマゾンのキンドル書籍ページに価格推移グラフを直接表示します（データがあれば）。
 また、セール対象作品の場合はキンセリのセールまとめページへのリンクも表示します（データがあれば）。
 
 ## 注意
 
-日本のアマゾン (amazon.co.jp) の Kindle 書籍の個別作品ページのみでしか動作しません。
+日本のアマゾン (amazon.co.jp) の Kindle 書籍の個別作品ページでしか動作しません。
 
 - 動作する（グラフが表示される）Amazonページの例 (sample Amazon page)
   - [黄泉のツガイ 1巻 (デジタル版ガンガンコミックス) | 荒川弘 | 少年マンガ | Kindleストア | Amazon](https://www.amazon.co.jp/gp/product/B09Y8YB5DP)
