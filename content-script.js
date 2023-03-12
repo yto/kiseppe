@@ -47,7 +47,7 @@ function main() {
 
     // iframeを作る
     let new_elm = document.createElement('div');
-    new_elm.innerHTML = '<iframe style="width: 100%; height: 0px; border: 0; overflow: hidden;" src="' + url + '" scrolling="yes" id="kiseppe"></iframe>';
+    new_elm.innerHTML = '<iframe style="width: 100%; height: 0px; border: 0; overflow: hidden;" src="' + url + '" scrolling="no" id="kiseppe"></iframe>';
     
     // iframeを挿入する
     let base_elm = document.getElementById('ATFCriticalFeaturesDataContainer');
