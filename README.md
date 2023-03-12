@@ -19,6 +19,15 @@ Once the browser extension is installed in Chrome,
 The extension displays price history graphs directly on Amazon Kindle book pages in Japan.
 In addition, if the book is on sale, links to Kinseri will also be displayed.
 
+## 注意
+
+日本のアマゾン (amazon.co.jp) の Kindle 書籍の個別ページのみでしか動作しません。
+
+Kiseppe only works on Japanese Amazon Kindle book pages.
+
+- 動作する（グラフが表示される）Amazonページの例 (sample Amazon page)
+  - [黄泉のツガイ 1巻 (デジタル版ガンガンコミックス) | 荒川弘 | 少年マンガ | Kindleストア | Amazon](https://www.amazon.co.jp/gp/product/B09Y8YB5DP)
+
 ## リンク
 
 - [キンセリ](https://yapi.ta2o.net/kndlsl)
