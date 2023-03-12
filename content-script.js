@@ -1,6 +1,6 @@
 function main() {
 
-    //// get hight of iframe : iframeの高さを得る（あとで）
+    //// iframeの高さを得る（あとで）
     window.addEventListener('message', function(e) {
 	var iframe = document.getElementById("kiseppe");
 	switch(e.data[0]) { // event name
@@ -10,12 +10,12 @@ function main() {
 	}
     }, false);
 
-    //// CHECK!!!  確認
+    //// 確認事項
 
-    // Is this page is for Kindle Book?  Kindle本のページであるか
+    // Kindle本のページであるか
     if (! document.getElementById('nav-search-label-id').textContent.match(/Kindle/m)) return;
 
-    // Does the page have ASIN?  ASINがあるか
+    // ASINがあるか
     if (! document.getElementById('ASIN')) return;
     const asin = document.getElementById('ASIN').value;
     if (! asin.match(/^B[0-9A-Z]{9}$/m)) return;
