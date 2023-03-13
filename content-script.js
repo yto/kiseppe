@@ -13,6 +13,7 @@ function main() {
     //// 確認事項
 
     // Kindle本のページであるか
+    if (! document.getElementById('nav-search-label-id')) return;
     if (! document.getElementById('nav-search-label-id').textContent.match(/Kindle/m)) return;
 
     // ASINがあるか
