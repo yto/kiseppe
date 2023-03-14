@@ -1,4 +1,12 @@
+2023-03-14  Tatsuwo  <yto at example.com>
+
+	* memo: 2回目審査
+
+	* manifest.json: 日本語を英語にした
+
 2023-03-13  Tatsuwo  <yto at example.com>
+
+	* memo: Chrome 審査 regect される
 
 	* content-script.js:
 	"Kindle本のページであるか" のチェック部分を少し丁寧にした。
