@@ -1,3 +1,19 @@
+2023-03-15  Tatsuwo  <yto at example.com>
+
+	* memo: 3回目審査
+	特に2回目の reject で言われていないけど、iframe はリモートコードではないみたい。
+	なのでリモートコード不使用に変更して申請。
+
+	* manifest.json:
+	delete: "permissions": ["activeTab", "scripting"],
+	delete: "action": {...},
+
+	* memo: 2回目審査 rejected.  なにやら私が勘違いしていた模様。
+	> 違反: 次の権限をリクエストしていますが使用していません。
+	> activeTab
+	> scripting
+	> 修正方法: 上記の権限を削除します
+
 2023-03-14  Tatsuwo  <yto at example.com>
 
 	* memo: 2回目審査
@@ -6,7 +22,7 @@
 
 2023-03-13  Tatsuwo  <yto at example.com>
 
-	* memo: Chrome 審査 regect される
+	* memo: Chrome 審査 reject される
 
 	* content-script.js:
 	"Kindle本のページであるか" のチェック部分を少し丁寧にした。
@@ -19,5 +35,4 @@
 2023-03-12  Tatsuwo  <yto at example.com>
 
 	* memo: github で公開。Chrome ウェブストアに審査出す。
-
 

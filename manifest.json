@@ -4,14 +4,10 @@
     "version": "1.0",
     "homepage_url": "https://yapi.ta2o.net/kndlsl/kiseppe/",
     "manifest_version": 3,
-    "permissions": ["activeTab", "scripting"],
     "icons": {
 	"16": "icon-16.png",
 	"48": "icon-48.png",
 	"128": "icon-128.png"
-    },
-    "action": {
-	"default_icon": "icon-16.png"
     },
     "content_scripts": [
 	{
