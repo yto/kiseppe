@@ -12,6 +12,8 @@ Kindle セール情報サイト「キンセリ」のブラウザ拡張機能で�
 キセッペはアマゾンのキンドル書籍ページに価格推移グラフを直接表示します（データがあれば）。
 また、セール対象作品の場合はキンセリのセールまとめページへのリンクも表示します（データがあれば）。
 
+- [Kiseppe - Price Chart for Amazon Japan Kindle - Chrome ウェブストア](https://chrome.google.com/webstore/detail/kiseppe-price-chart-for-a/jhmbgbjpbiiklgmfabbcldoddlljplle) (2023/3/16 JST 公開)
+
 ## 注意
 
 日本のアマゾン (amazon.co.jp) の Kindle 書籍の個別作品ページでしか動作しません。
@@ -21,10 +23,9 @@ Kindle セール情報サイト「キンセリ」のブラウザ拡張機能で�
 
 ## リンク
 
+- [Kiseppe - Price Chart for Amazon Japan Kindle - Chrome ウェブストア](https://chrome.google.com/webstore/detail/kiseppe-price-chart-for-a/jhmbgbjpbiiklgmfabbcldoddlljplle)
 - [キセッペ (キンセリのChrome拡張機能)](https://yapi.ta2o.net/kndlsl/kiseppe/)
   - キセッペの公式ページです
-- Chrome ウェブストア (審査中)
-  - 2023/3/12 に審査に出しました
 - [キンセリ](https://yapi.ta2o.net/kndlsl)
   - Kindle セール情報サイト
   - キセッペではキンセリで整備しているデータを利用しています
