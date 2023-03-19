@@ -1,3 +1,21 @@
+2023-03-19  Tatsuwo  <yto at example.com>
+
+	* manifest.json: ff用の記述
+	"browser_specific_settings": { "gecko": { "id": "kiseppe_ff@example.com" } },
+
+	* memo: Firefox 拡張機能の審査通る。1回で済んだ。
+	Kiseppe - Kindle Price Chart – 🦊 Firefox (ja) 向け拡張機能を入手
+https://addons.mozilla.org/ja/firefox/addon/kiseppe-price-chart-kindle/
+
+	ffでの問題点。
+	ff だと iframe の src 側の高さが想定よりも高くなる。
+	iframe 内に描画される前の src 側の width が 90px とかになっている模様。
+	src 側 (api 出力) で 400 max にすることに。
+
+2023-03-18  Tatsuwo  <yto at example.com>
+
+	* memo: Firefox 拡張機能の審査待ち。
+
 2023-03-16  Tatsuwo  <yto at example.com>
 
 	* memo: 3回目審査通って Chrome ウェブストアで公開された。
