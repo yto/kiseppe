@@ -1,6 +1,6 @@
 # キセッペ - Kiseppe
 
-Chrome Extension : Price Hitory Graph for Japanese Amazon Kindle Books
+Browser (Chrome/Firefox) Extension : Price Hitory Graph for Japanese Amazon Kindle Books
 
 <img src="https://www.listasin.net/api/img/chex-kiseppe-1280x800.jpg" width="640" height="400">
 
@@ -13,6 +13,7 @@ Kindle セール情報サイト「キンセリ」のブラウザ拡張機能で�
 また、セール対象作品の場合はキンセリのセールまとめページへのリンクも表示します（データがあれば）。
 
 - [Kiseppe - Price Chart for Amazon Japan Kindle - Chrome ウェブストア](https://chrome.google.com/webstore/detail/kiseppe-price-chart-for-a/jhmbgbjpbiiklgmfabbcldoddlljplle) (2023/3/16 JST 公開)
+- [Kiseppe - Kindle Price Chart – 🦊 Firefox (ja) 向け拡張機能を入手](https://addons.mozilla.org/ja/firefox/addon/kiseppe-price-chart-kindle/)
 
 ## 注意
 
@@ -24,7 +25,8 @@ Kindle セール情報サイト「キンセリ」のブラウザ拡張機能で�
 ## リンク
 
 - [Kiseppe - Price Chart for Amazon Japan Kindle - Chrome ウェブストア](https://chrome.google.com/webstore/detail/kiseppe-price-chart-for-a/jhmbgbjpbiiklgmfabbcldoddlljplle)
-- [キセッペ (キンセリのChrome拡張機能)](https://yapi.ta2o.net/kndlsl/kiseppe/)
+- [Kiseppe - Kindle Price Chart – 🦊 Firefox (ja) 向け拡張機能を入手](https://addons.mozilla.org/ja/firefox/addon/kiseppe-price-chart-kindle/)
+- [キセッペ (キンセリのブラウザ拡張機能)](https://yapi.ta2o.net/kndlsl/kiseppe/)
   - キセッペの公式ページです
 - [キンセリ](https://yapi.ta2o.net/kndlsl)
   - Kindle セール情報サイト
