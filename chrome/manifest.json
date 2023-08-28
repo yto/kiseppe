@@ -4,7 +4,6 @@
     "version": "1.0",
     "homepage_url": "https://yapi.ta2o.net/kndlsl/kiseppe/",
     "manifest_version": 3,
-    "browser_specific_settings": { "gecko": { "id": "kiseppe_ff@example.com" } },
     "icons": {
 	"16": "icon-16.png",
 	"48": "icon-48.png",
