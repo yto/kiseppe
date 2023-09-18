@@ -1,3 +1,35 @@
+2023-09-18  Tatsuwo  <yto at example.com>
+
+	* chrome/background.js: 2.0 に向けて。
+
+	* chrome/manifest.json: 2.0 に向けて。
+
+	* chrome/content-script.js: 2.0 に向けて。
+	検索結果ページ、まとめページ、特設ページなどに
+	- グラフ表示ボタン
+	- 実質割引率の表示と率に応じた背景色変更
+
+2023-08-29  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: memo: iframe の読み込み終了後に contentWindow で高さを取得する方式は使えない。
+	> let new_elm = document.createElement('iframe');
+	> new_elm.style.width = '100%';
+	> new_elm.id = 'kiseppe';
+	> new_elm.src = url;
+	> new_elm.onload = function(e) {
+	>   console.log('loaded iframe');
+	>   console.log(e.target.contentWindow.document);
+	>   // CORSがらみのエラーがでる
+	> };
+
+2023-08-28  Tatsuwo  <yto at example.com>
+
+	* chrome/manifest.json:	firefox で動くようにしたら chrome で動かなくなっていたので直した。
+
+	* memo: chrome と firefox とでコードをわけた。
+	それぞれ用のディレクトリ作って分類。
+	promotion 画像は images ディレクトリへ。
+
 2023-04-02  Tatsuwo  <yto at example.com>
 
 	* v1.0.2: Firefox の審査通ったので 1.0.2 に (リリース忘れてた)
