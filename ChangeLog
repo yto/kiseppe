@@ -1,3 +1,11 @@
+2023-09-19  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	- bug fix: AISNページで複数グラフがでることあり。 executeScript にした影響。
+	  ＝＞ すでにグラフが表示されてたら帰る処理を追加
+	- シリーズ「シリーズにセール作品あり」の表示
+	- API の仕様を変えたので対応
+
 2023-09-18  Tatsuwo  <yto at example.com>
 
 	* chrome/background.js: 2.0 に向けて。

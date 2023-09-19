@@ -1,35 +1,43 @@
 
+
 async function main() {
 
+    const DEBUG_API = 'https://www.listasin.net/api/debug-logging.cgi?asins=';
+    const KS_JD_API = 'https://www.listasin.net/api/0199_jd.cgi?asins=';
     const asinatsu_sleep = ms => new Promise(res => setTimeout(res, ms));
 
     //
     // Kindle ASIN page
     //
-    // kiseppe 1.0 の main() を asin_page_main() をして呼び出す
     if (document.getElementById('ASIN')) {
-	console.log("here is Kindle ASIN Page");
+        console.log("kiseppe: here is Kindle ASIN Page");
         const asin = document.getElementById('ASIN').value;
         if (asin.match(/^B[0-9A-Z]{9}$/m)) {
-	    asin_page_main(); // call kiseppe 1.0
+            // call kiseppe 1.0
+	    // (kiseppe1.0::main() => asin_page_main())
+            asin_page_main();
 
-	    // コレクション ASIN の取得
-	    // todo: コレクション API を呼び出す（未実装）
+	    // コレクション API を呼び出す
             let c = document.querySelector("a[href*='binding=kindle_edition']");
-            if (c) {
-                let r = c.getAttribute('href').match(/(B0[0-9A-Z]{8})/);
-                let collection_asin = r[0];
-                //// build API url and access
-		const url = 'https://www.listasin.net/api/debug-logging.cgi?asins=COL_' + collection_asin + ',' + asin;
-                console.log(url);
-		try {
-                    fetch(url).then(e => {console.log(e)});
-		} catch (error) {
-		    console.error(error);
-		}
-            }
+            if (! c) return;
+	    if (/🉐/.test(c.innerHTML)) return;
+            let r = c.getAttribute('href').match(/(B0[0-9A-Z]{8})/);
+            let collection_asin = r[0];
+            //// build API url and access
+            const url = `${KS_JD_API}COL_${collection_asin},${asin}`;
+	    console.log(url);
 
-	    return;
+            await fetch(url).then(r => r.json()).then(res => {
+		console.log(res['result']['series']);
+		const sd = res['result']['series'][collection_asin];
+                //// 実質割引率 15% 以上のもののみ処理を行う
+                if (! sd || Number(sd) < 15 ) return;
+		//c.style.backgroundColor = '#FFE8E8';
+		if (! /🉐/.test(c.innerHTML))
+		    c.innerHTML += '<span style="font-size: xx-small; background-color: #FFE8E8">🉐シリーズにセール作品あり</span>';
+	    });
+
+            return;
         }
     }
 
@@ -39,28 +47,42 @@ async function main() {
     // data-collection-asin="B0B3TFK9YX" 
     // data-ajax-url="...B074V5W2R7,B074V3V9W5,B074V5W5GT"
     if (document.querySelector('[data-collection-asin]')) {
-	console.log("here is Kindle Matomegai Page");
-        let collection_asin = document.querySelector('[data-collection-asin]').getAttribute('data-collection-asin');
+        console.log("kiseppe: here is Kindle Matomegai Page");
+
+        let collection_asin =
+	    document.querySelector('[data-collection-asin]').
+	    getAttribute('data-collection-asin');
+	if (! collection_asin) return;
         let aset = new Set();
-        document.querySelectorAll('[data-ajax-url]').forEach(
-            e => {
-                const u = e.getAttribute('data-ajax-url');
-                console.log(u);
-                const r = u.match(/(B0[0-9A-Z]{8})/g);
-                r.forEach(s => aset.add(s));
-            }
-        );
+        document.querySelectorAll('[data-ajax-url]').forEach(e => {
+	    const u = e.getAttribute('data-ajax-url');
+            console.log(u);
+            const r = u.match(/(B0[0-9A-Z]{8})/g);
+            r.forEach(s => aset.add(s));
+        });
         let asins = Array.from(aset);
-    
+
         //// build API url and access
-	// todo: コレクション API を呼び出す（未実装）
-	const url = 'https://www.listasin.net/api/debug-logging.cgi?asins=COL_' + collection_asin + ',' + asins;
+	// コレクション API を呼び出す
+        const url = `${KS_JD_API}COL_${collection_asin},${asins}`;
 	console.log(url);
-	try {
-	    fetch(url).then(e => {console.log(e)});
-	} catch (error) {
-	    console.error(error);
-	}
+        try {
+            await fetch(url).then(r => r.json()).then(res => {
+		console.log(res['result']['series']);
+		const sd = res['result']['series'][collection_asin];
+                //// 実質割引率 15% 以上のもののみ処理を行う
+                if (! sd || Number(sd) < 15) return;
+		let c = document.getElementById('collection-masthead__title').parentNode;
+		if (/🉐/.test(c.innerHTML)) return;
+                let jh = document.createElement('span');
+		jh.style.backgroundColor = "#FFE8E8";
+                jh.innerHTML = '🉐シリーズにセール作品あり';
+		c.appendChild(jh);
+	    });
+        } catch (error) {
+            console.error(error);
+        }
+
         return;
     }
 
@@ -68,235 +90,294 @@ async function main() {
     // is Kindle Search Page?
     //
     if (document.querySelector('div#search') &&
-	document.querySelector('div#nav-subnav[data-category="digital-text"]')
+        document.querySelector('div#nav-subnav[data-category="digital-text"]')
        ) {
-	console.log("here is Kindle Search Page");
+        console.log("kiseppe: here is Kindle Search Page");
 
-	console.log("wait a few seconds");
-	await asinatsu_sleep(2000);
-	console.log("ok, go!");
+        console.log("wait a few seconds");
+        await asinatsu_sleep(2000);
+        console.log("ok, go!");
 
-	//// kiseppe API になげるための ASIN の収集とグラフボタンの設置
-	let alist = [];
+        //// kiseppe API になげるための ASIN の収集とグラフボタンの設置
+        let alist = [];
         let calist = [];
-	document.querySelectorAll('div[data-asin][data-component-type="s-search-result"]').forEach(
-            e => {
-		let asin = e.dataset.asin;
+        document.querySelectorAll(
+	    'div[data-asin][data-component-type="s-search-result"]'
+	).forEach(e => {
+            let asin = e.dataset.asin;
 
-		// kiseppe API になげるための ASIN の収集
-		let seri = e.querySelector('div.a-row > a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style[href*="kindle_edition"]');
-		if (seri) {
-                    const r = seri.getAttribute('href').match(/\/(B0[0-9A-Z]{8})/);
-		    calist.push("COL_" + r[1]);
-		    calist.push(asin);
-		} else {
-		    alist.push(asin);
-		}
+            // kiseppe API になげるための ASIN の収集
+            let seri = e.querySelector('div.a-row > a.a-link-normal.s-underline-text.s-underline-link-text.s-link-style[href*="kindle_edition"]');
+            if (seri) {
+                const r = seri.getAttribute('href').match(/\/(B0[0-9A-Z]{8})/);
+                calist.push("COL_" + r[1]);
+                calist.push(asin);
+            } else {
+                alist.push(asin);
+            }
 
-		// グラフボタンの設置
-		let item_title = e.querySelector('h2').textContent;
-		let pgd = build_price_graph_dialog(asin, item_title);
-		pgd.style.paddingRight = "3px";
-		pgd.style.fontSize = "large";
-		e.querySelector('h2').prepend(pgd);
-	    }
-        );
-	// kiseppe API になげるための ASIN リスト
-	let asins = [alist, calist].flat().join(",");
+            // グラフボタンの設置
+            let item_title = e.querySelector('h2').textContent;
+            let pgd = build_price_graph_dialog(asin, item_title);
+            pgd.style.paddingRight = "3px";
+            pgd.style.fontSize = "large";
+            e.querySelector('h2').prepend(pgd);
+        });
+        // kiseppe API になげるための ASIN リスト
+        let asins = [alist, calist].flat().join(",");
 
         // build API url
-	const url = 'https://www.listasin.net/api/0001_jd.cgi?asins=' + asins;
+        const url = `${KS_JD_API}${asins}`;
         console.log(url);
 
-	//// API になげてその結果を受けての処理
-	await fetch(url).then(res => res.json()).then(v => {
-	    console.log(v['res']);
-	    // API の結果のそれぞれの ASIN について処理
-	    Object.keys(v['res']).forEach(asin => {
-		//console.log(asin);
-		// 実質割引率 15% 以上のもののみ処理を行う
-		if (v['res'][asin] && Number(v['res'][asin]) >= 15 ) {
-		    // 実質割引率の表示エリア
-		    let jh = document.createElement('span');
-		    jh.style.position = "absolute";
-		    jh.style.bottom = "1rem";
-		    jh.style.right = "1rem";
-		    jh.style.zIndex = "10000";
-		    jh.innerHTML = `🉐実質<b>${v['res'][asin]}</b>%オフ`;
+        //// API になげてその結果を受けての処理
+        await fetch(url).then(r => r.json()).then(res => {
+	    const ri = res['result']['items'];
+	    const rs = res['result']['series'];
+            console.log(ri);
+            console.log(rs);
+            // API の結果のそれぞれの ASIN について処理
+            Object.keys(ri).forEach(asin => {
+                const cntn = document.querySelector('div[data-asin="'+asin+'"]');
 
-		    // 割引作品の背景色を変更する
-		    const toumei = Number(v['res'][asin]) / 100 * 0.2;
-		    const it = document.querySelector('div[data-asin="'+asin+'"]');
-		    const c = it.querySelector('div[class^="s-card-container"] div[class$=s-list-col-right]');
-		    c.style.backgroundColor = 'rgba(255,0,0,'+toumei+')';
-
-		    // 表示エリアをページに表示
-		    it.style.position = "relative";
-		    it.prepend(jh);
+		//// シリーズの作品のどれかの実質割引率が 15% 以上のときの処理
+		let sr = cntn.querySelector('a[href*="binding=kindle_edition"]');
+		if (rs && sr) {
+		    let r = sr.getAttribute('href').match(/(B0[0-9A-Z]{8})/);
+		    let srasin = r[0];
+		    if (rs[srasin] && Number(rs[srasin]) >= 15) {
+			//sr.innerHTML += '<span style="font-size: xx-small; background-color: #FFE8E8">🉐シリーズにセール作品あり</span>';
+			let jh = document.createElement('span');
+			jh.style.backgroundColor = "#FFE8E8";
+			jh.style.fontSize = "xx-small";
+			jh.innerHTML = '🉐シリーズにセール作品あり';
+			sr.appendChild(jh);
+		    }
 		}
+		
+		//// この作品の実質割引率が 15% 以上のときの処理
+                if (Number(ri[asin]) < 15 ) return;
+
+		// 実質割引率の表示エリア
+                let jh = document.createElement('span');
+                jh.style.position = "absolute";
+                jh.style.bottom = "1rem";
+                jh.style.right = "1rem";
+                jh.style.zIndex = "10000";
+                jh.innerHTML = `🉐実質<b>${ri[asin]}</b>%オフ`;
+                // 表示エリアをページに表示
+                cntn.style.position = "relative";
+                cntn.prepend(jh);
+
+                // 割引作品の背景色を変更する
+                const toumei = Number(ri[asin]) / 100 * 0.2;
+                const c = cntn.querySelector('div[class^="s-card-container"] div[class$=s-list-col-right]');
+                c.style.backgroundColor = `rgba(255,0,0,${toumei})`;
+
 	    });
-	});
-	
-	return;
+        });
+        
+        return;
     }
 
     //
     // is Kindle Store Page?
     //
     if (document.querySelector('#nav-subnav[data-category=digital-text]')) {
-	console.log("here is Kindle Store Page");
+        console.log("kiseppe: here is Kindle Store Page");
 
-	if (document.querySelector('div[class^="_octopus-search-result-card_"], div[class*="asin-container"]')) {
-	    console.log("wait a few seconds");
-	    await asinatsu_sleep(2000);
-	    console.log("ok, go!");
-	}
+        if (document.querySelector(
+	    'div[class^="_octopus-search-result-card_"], div[class*="asin-container"]'
+	)) {
+            console.log("wait a few seconds");
+            await asinatsu_sleep(2000);
+            console.log("ok, go!");
+        }
 
-	// get all ASINs
-        let aset = new Set();
+        // get all ASINs
+	let aset = new Set();
+        let caset = new Set();
         document.querySelectorAll("a[href]").forEach(e => {
-            const r = e.getAttribute('href').match(/\/(B0[0-9A-Z]{8})/);
-            if (r) aset.add(r[1]);
-        });
-        console.log(aset.size, aset);
-        let asins = Array.from(aset);
-
-	// octopus_search トップにいくつか表示されるやつ の ASIN のみ取り出す
-	// Ex. https://www.amazon.co.jp/b?node=22083216051
-	const sr_asins = asins.filter(asin => 
-	    document.querySelector(`h2 a[href*="/dp/${asin}"],a[href*="/dp/${asin}"] h2`));
-	console.log(sr_asins, sr_asins.length);
-	let apires = {};
-	if (sr_asins.length > 0) {
-            //// build API url and access
-	    const url = 'https://www.listasin.net/api/0001_jd.cgi?asins=' + sr_asins;
-            console.log(url);
-            apires = await fetch(url).then(res => res.json());
-	} else { // search result 無いとき
-            //// build API url and access
-	    const url = 'https://www.listasin.net/api/debug-logging.cgi?asins=' + asins;
-            console.log(url);
-	    try {
-		apires = await fetch(url).then(res => res.json())
-	    } catch (error) {
-		console.error(error);
+	    const url = e.getAttribute('href');
+            const r = url.match(/\/(B0[0-9A-Z]{8})/);
+            if (! r) return;
+	    if (/binding=kindle_edition/.test(url)) {
+		caset.add('COL_' + r[1]);
+	    } else {
+		aset.add(r[1]);
 	    }
-	}
+        });
+        console.log("aset:", aset.size, aset);
+        console.log("caset:", caset.size, caset);
+        let asins = Array.from(aset);
+        let calist = Array.from(caset);
 
-	asins.forEach(asin => {
-	    // グリッド表示
-	    // Ex. https://www.amazon.co.jp/kindle-dbs/browse?metadata=cardAppType&storeType=ebooks&sourceType=recs&widgetId=unified-ebooks-storefront-default_KindleUnlimitedCrossCategoryStrategyEbookSources
-	    // 横スクロール表示
-	    // Ex. https://www.amazon.co.jp/kindle-dbs/storefront?storeType=browse&node=2275256051
-	    // octopus_search トップにいくつか表示されるやつ
-	    // Ex. https://www.amazon.co.jp/b?node=22083216051
-	    // セール＆キャンペーンなどで表示される検索結果表示
-	    // Ex. https://www.amazon.co.jp/b?node=22083216051
-	    Array.from(document.querySelectorAll(`a[href^="/gp/product/${asin}"]`)).forEach(e => {
-		//console.log('heheh', asin, e);
-		let item_title = '';
-		if (e.getAttribute('aria-label'))
-		    // for グリッド表示
-		    item_title = e.getAttribute('aria-label')
-		else if (e.querySelector('img[alt][data-a-dynamic-image]'))
-		    // for 横スクロール表示
-		    item_title = e.querySelector('img[alt][data-a-dynamic-image]').getAttribute('alt');
-		//console.log(e.parentNode.textContent);
-		if (item_title && ! /📊/.test(e.parentNode.textContent)) {
-		    let pgd = build_price_graph_dialog(asin, item_title);
-		    e.parentNode.insertBefore(pgd, e.nextSibling);
+        // octopus_search トップにいくつか表示されるやつ の ASIN のみ取り出す
+        // Ex. https://www.amazon.co.jp/b?node=22083216051
+        const oct_asins = asins.filter(asin => document.querySelector(
+	    `h2 a[href*="/dp/${asin}"],a[href*="/dp/${asin}"] h2`
+	));
+        console.log(oct_asins, oct_asins.length);
+        let res = {};
+	let ri = {};
+	let rs = {};
+        if (oct_asins.length > 0) {
+            //// build API url and access
+            const as = [oct_asins, calist].flat().join(",");
+            const url = `${KS_JD_API}${as}`;
+	    console.log(url);
+            res = await fetch(url).then(r => r.json());
+	    ri = res['result']['items'];
+	    rs = res['result']['series'];
+        } else { // search result 無いとき
+            //// build API url and access
+            const url = `${DEBUG_API}${asins}`;
+            console.log(url);
+            try {
+                res = await fetch(url).then(r => r.json())
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        asins.forEach(asin => {
+
+            // グリッド表示
+            // Ex. https://www.amazon.co.jp/kindle-dbs/browse?metadata=cardAppType&storeType=ebooks&sourceType=recs&widgetId=unified-ebooks-storefront-default_KindleUnlimitedCrossCategoryStrategyEbookSources
+            // 横スクロール表示
+            // Ex. https://www.amazon.co.jp/kindle-dbs/storefront?storeType=browse&node=2275256051
+            Array.from(document.querySelectorAll(
+		`a[href^="/gp/product/${asin}"]`
+	    )).forEach(e => {
+                let item_title = '';
+                if (e.getAttribute('aria-label')) {
+                    // for グリッド表示
+                    console.log('kiseppe: grid-30', asin, e);
+                    item_title = e.getAttribute('aria-label')
+                } else if (e.querySelector('img[alt][data-a-dynamic-image]')) {
+                    // for 横スクロール表示
+                    console.log('kiseppe: horizontal-scroll', asin, e);
+                    item_title = e.querySelector('img[alt][data-a-dynamic-image]').getAttribute('alt');
 		}
-	    });
+		// グラフボタンの設置
+                if (/📊/.test(e.parentNode.textContent)) return;
+                if (! item_title) return;
+                let pgd = build_price_graph_dialog(asin, item_title);
+                e.parentNode.insertBefore(pgd, e.nextSibling);
+            });
 
-	    // 横並びだけどスクロールしないやつ
-	    // Ex. https://www.amazon.co.jp/b?node=2292699051
-	    Array.from(document.querySelectorAll(`li span[class="a-list-item"] a[href*="/dp/${asin}"]`)).forEach(e => {
-		//console.log('bebe', asin, e);
-		let item_title = '';
-		if (e.querySelector('img[alt]'))
-		    item_title = e.querySelector('img[alt]').getAttribute('alt');
-		if (item_title) {
-		    let pgd = build_price_graph_dialog(asin, item_title);
-		    //e.parentNode.insertBefore(pgd, e.nextSibling);
-		    pgd.style.position = "absolute";
-		    pgd.style.bottom = "1rem";
-		    pgd.style.right = "1rem";
-		    pgd.style.zIndex = "10000";
-		    let c = e.closest('li');
-		    c.style.position = "relative";
-		    if (! /📊/.test(c.textContent)) c.appendChild(pgd);
-		}
-	    });
+            // 横並びだけどスクロールしないやつ
+            // Ex. https://www.amazon.co.jp/b?node=2292699051
+            Array.from(document.querySelectorAll(
+		`li span[class="a-list-item"] a[href*="/dp/${asin}"]`
+	    )).forEach(e => {
+                console.log('kiseppe: no-scroll-list', asin, e);
+                let c = e.closest('li');
 
-	    // octopus_search: トップにいくつか表示されるやつ
-	    // Ex. https://www.amazon.co.jp/b?node=22083216051
-	    if (document.querySelector(`h2 a[href*="/dp/${asin}"]`)) {
-		let e = document.querySelector(`h2 a[href*="/dp/${asin}"]`)
-		let item_title = e.textContent;
-		if (item_title) {
-		    let pgd = build_price_graph_dialog(asin, item_title);
-		    pgd.style.paddingRight = "3px";
-		    pgd.style.fontSize = "large";
-		    e.parentNode.prepend(pgd);
+		// グラフボタンの設置
+                if (/📊/.test(c.textContent)) return;
+                let item_title = '';
+                if (e.querySelector('img[alt]'))
+                    item_title = e.querySelector('img[alt]').getAttribute('alt');
+                if (! item_title) return;
+                let pgd = build_price_graph_dialog(asin, item_title);
+                pgd.style.position = "absolute";
+                pgd.style.bottom = "1rem";
+                pgd.style.right = "1rem";
+                pgd.style.zIndex = "10000";
+                c.style.position = "relative";
+                c.appendChild(pgd);
+            });
 
-		    if (apires['res'][asin] && Number(apires['res'][asin]) >= 15 ) {
-			// 割引作品の背景色を変更する
-			let c = e.closest('div[class*="s-card-container"]');
-			const toumei = Number(apires['res'][asin]) / 100 * 0.2;
-			c.style.backgroundColor = 'rgba(255,0,0,'+toumei+')';
+            // octopus_search: トップにいくつか表示されるやつ
+            // Ex. https://www.amazon.co.jp/b?node=22083216051
+            let e;
+            if (e = document.querySelector(
+		`h2 a[href*="/dp/${asin}"]`
+	    )) {
+                console.log('kiseppe: octopus-search', asin, e);
+                let cntn = e.closest('div[class*="s-card-container"]');
+                console.log(cntn);
 
-			//
-			let jh = document.createElement('div');
-			jh.innerHTML = `🉐実質<b>${apires['res'][asin]}</b>%オフ`;
-			jh.style.textAlign = 'right';
-			jh.style.marginTop = '0.5rem';
-			//e.parentNode.prepend(jh);
-			e.parentNode.parentNode.parentNode.appendChild(jh);
+		// グラフボタンの設置
+                if (/📊/.test(cntn.textContent)) return;
+                let item_title = e.textContent;
+                if (! item_title) return;
+                let pgd = build_price_graph_dialog(asin, item_title);
+                pgd.style.paddingRight = "3px";
+                pgd.style.fontSize = "large";
+                e.parentNode.prepend(pgd);
+
+		//// シリーズの作品のどれかの実質割引率が 15% 以上のときの処理
+		let sr = cntn.querySelector('a[href*="binding=kindle_edition"]');
+		if (rs && sr) {
+		    let r = sr.getAttribute('href').match(/(B0[0-9A-Z]{8})/);
+		    let srasin = r[0];
+		    if (rs[srasin] && Number(rs[srasin]) >= 15) {
+			//sr.innerHTML += '<span style="font-size: xx-small; background-color: #FFE8E8">🉐シリーズにセール作品あり</span>';
+			let jh = document.createElement('span');
+			jh.style.backgroundColor = "#FFE8E8";
+			jh.style.fontSize = "xx-small";
+			jh.innerHTML = '🉐シリーズにセール作品あり';
+			sr.appendChild(jh);
 		    }
 		}
-	    }
 
-	    // セール＆キャンペーンなどで表示される検索結果表示
-	    // Ex. https://www.amazon.co.jp/b?node=22083216051
-	    if (document.querySelector(`div[class*="asin-container"] a[href*="/dp/${asin}"]`)) {
-		console.log('kekek');
-		let e = document.querySelector(`div[class*="asin-container"] a[href*="/dp/${asin}"]`);
-		item_title = e.querySelector('img[alt]').getAttribute('alt');
-		let pgd = build_price_graph_dialog(asin, item_title);
-		e.closest('div[class*="asin-container"]').style.position = "relative";
-		e.closest('div[class*="asin-container"]').appendChild(pgd);
-		pgd.style.position = "absolute";
-		pgd.style.bottom = "0.1rem";
-		pgd.style.left = "0.1rem";
-		pgd.style.zIndex = "10000";
+                //// 実質割引率 15% 以上のもののみ処理を行う
+                if (! ri[asin] || Number(ri[asin]) < 15) return;
+                // 割引作品の背景色を変更する
+                const toumei = Number(ri[asin]) / 100 * 0.2;
+                cntn.style.backgroundColor = `rgba(255,0,0,${toumei})`;
+                // 実質割引率の表示エリア
+                let jh = document.createElement('div');
+                jh.innerHTML = `🉐実質<b>${ri[asin]}</b>%オフ`;
+                jh.style.textAlign = 'right';
+                jh.style.marginTop = '0.5rem';
+                //e.parentNode.prepend(jh);
+                e.parentNode.parentNode.parentNode.appendChild(jh);
+            }
 
-		if (apires['res'][asin] && Number(apires['res'][asin]) >= 15 ) {
-		    // 割引作品の背景色を変更する
-		    let c = e.closest('div[class*="asin-container"]');
-		    const toumei = Number(apires['res'][asin]) / 100 * 0.3;
-		    c.style.background = 'linear-gradient(rgba(255,0,0,'+toumei+'), white)';
+            // セール＆キャンペーンなどで表示される検索結果表示
+	    // Ex. https://www.amazon.co.jp/hko/deals/?_encoding=UTF8
+            if (e = document.querySelector(
+		`div[class*="asin-container"] a[href*="/dp/${asin}"]`
+	    )) {
+                console.log('kiseppe: grid-12', asin, e);
+                let c = e.closest('div[class*="asin-container"]');
 
-		    let jh = document.createElement('div');
-		    jh.innerHTML = `🉐<br>実質<br><b>${apires['res'][asin]}%</b><br>オフ`;
-		    jh.style.position = "absolute";
-		    jh.style.bottom = "0.1rem";
-		    jh.style.right = "0.3rem";
-		    jh.style.border = "1px solid brown";
-		    jh.style.padding = "0.1rem 0.2rem";
-		    jh.style.fontSize = "small";
-		    jh.style.lineHeight = "1.05em";
-		    e.closest('div[class*="asin-container"]').appendChild(jh);
+		// グラフボタンの設置
+                if (/📊/.test(c.textContent)) return;
+                item_title = e.querySelector('img[alt]').getAttribute('alt');
+                if (! item_title) return;
+                let pgd = build_price_graph_dialog(asin, item_title);
+                pgd.style.position = "absolute";
+                pgd.style.bottom = "0.1rem";
+                pgd.style.left = "0.1rem";
+                pgd.style.zIndex = "10000";
+                c.style.position = "relative";
+                c.appendChild(pgd);
 
-		}
+                //// 実質割引率 15% 以上のもののみ処理を行う
+                if (! ri[asin] || Number(ri[asin]) < 15) return;
+                // 割引作品の背景色を変更する
+                const toumei = Number(ri[asin]) / 100 * 0.3;
+                c.style.background =
+		    `linear-gradient(rgba(255,0,0,${toumei}), white)`;
+                // 実質割引率の表示エリア
+                let jh = document.createElement('div');
+                jh.innerHTML = `🉐<br>実質<br><b>${ri[asin]}%</b><br>オフ`;
+                jh.style.position = "absolute";
+                jh.style.bottom = "0.1rem";
+                jh.style.right = "0.3rem";
+                jh.style.border = "1px solid brown";
+                jh.style.padding = "0.1rem 0.2rem";
+                jh.style.fontSize = "small";
+                jh.style.lineHeight = "1.05em";
+                c.appendChild(jh);
+            }
+        });
 
-
-	    }
-
-
-
-	});
-
-	return;
+        return;
     }
 
 };
@@ -319,41 +400,41 @@ function build_price_graph_dialog(asin, title) {
     
     // クリックしたらグラフなどを表示
     d.addEventListener('click', (event) => {
-	//console.log('hello in');
-	
-	//// build API url (returns a web page for iframe)
-	const url = 'https://www.listasin.net/api/0000/chex/' + asin + '--';
-	console.log(url);
+        //// build API url (returns a web page for iframe)
+        const url = 'https://www.listasin.net/api/0000/chex/' + asin + '--';
+        console.log(url);
 
-	let pp = document.getElementById("popup_modal");
-	if (! pp) {
-	    pp = document.createElement('dialog');
-	    pp.id = "popup_modal";
-	    pp.style.border = "none";
-	    pp.style.borderRadius = "8px";
-	    pp.addEventListener('click', (e) => {
-		if (e.target.closest('#price_graph_container') === null) pp.close();
-	    });
-	    document.querySelector("noscript").before(pp);
-	}
+	// 共通 dialog エレメント、なければ作る
+        let pp = document.getElementById("popup_modal");
+        if (! pp) {
+            pp = document.createElement('dialog');
+            pp.id = "popup_modal";
+            pp.addEventListener('click', e => 
+                e.target.closest('#pg_container') || pp.close());
+            document.querySelector("noscript").before(pp);
+        }
 
-	pp.innerHTML = `
+        pp.innerHTML = `
 <style>
+dialog#popup_modal { border: none; border-radius: 8px; }
 dialog#popup_modal::backdrop { background: rgba(0,0,0,.5); }
+#pg_container { width: 850px; text-align: center; }
+#pg_container .pg_item_info { height: 400px; }
+#pg_container .pg_item_title { font-weight: bold; margin-bottom: 0.5rem;
+  text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
+#pg_container iframe {width: 100%; height: 100%; border: 0; overflow: visible;}
 </style>
-<div id="price_graph_container" style="width: 850px; text-align: center;">
-<div style="height: 400px;">
-<div style="font-weight: bold; margin-bottom: 0.5rem;
-text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
-">${title}</div>
-<iframe style="width: 100%; height: 100%; border: 0; overflow: visible;" src="${url}" scrolling="no"></iframe>
-</div>
-<button onclick="document.getElementById('popup_modal').close()">Close</button>
+<div id="pg_container">
+ <div class="pg_item_info">
+  <div class="pg_item_title">${title}</div>
+  <iframe src="${url}" scrolling="no"></iframe>
+ </div>
+ <button onclick="document.getElementById('popup_modal').close()">Close</button>
 </div>
 `;
-	document.getElementById("popup_modal").showModal();
+        document.getElementById("popup_modal").showModal();
 
-	event.stopPropagation();
+        event.stopPropagation();
     });
 
     return d;
@@ -365,6 +446,9 @@ text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
 // (inserts a Price Graph iframe in an ASIN page)
 //
 function asin_page_main() {
+
+    //// すでにグラフが表示されてたら帰る
+    if (document.getElementById('kiseppe')) return;
 
     //// iframeの高さを得る（あとで）
     window.addEventListener('message', function(e) {
@@ -386,7 +470,7 @@ function asin_page_main() {
     if (! document.getElementById('ASIN')) return;
     const asin = document.getElementById('ASIN').value;
     if (! asin.match(/^B[0-9A-Z]{9}$/m)) return;
-    console.log("kisepa: " + asin);
+    console.log(`kiseppe: ${asin}`);
 
     //// Amazonページから価格を取得
     let _pr = document.getElementById('youPaySection');
