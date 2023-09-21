@@ -1,3 +1,13 @@
+2023-09-21  Tatsuwo  <yto at example.com>
+
+	* chrome/manifest.json: background 関連の削除
+
+	* chrome/background.js: これいらなかったっぽい
+
+	* chrome/content-script.js:
+	- horizontal 整理、manga-store 対応など
+	- grid 30 整理
+
 2023-09-20  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js: ランキングページにも対応。
