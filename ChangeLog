@@ -1,3 +1,9 @@
+2023-09-24  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	- MutationObserver 完全に理解した（）
+	- 処理する対象を page と component にわけて整理した
+
 2023-09-23  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js:

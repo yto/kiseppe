@@ -1,204 +1,229 @@
 
 // Kiseppe's target pages
 //
+// Pages:
 // - Kindle ASIN Page
-//   - [price-graph-iframe][series-jsdr]
+//   - insert:[price-graph-iframe][series-jsdr]
 // - Kindle Series Page
-//   - [series-jsdr][price-graph-button][item-jsdr]
-//   - onscroll
+//   - insert:[price-graph-button][item-jsdr][series-jsdr]
+//   - observe
 // - Kindle Search Page
-//   - [price-graph-button][item-jsdr][series-jsdr]
+//   - insert:[price-graph-button][item-jsdr][series-jsdr]
+//   - observe
 //   - wait
-// - Kindle Ranking Page
-//   - [price-graph-button][item-jsdr]
-//   - onscroll
-// - Kindle Grid30 Page
-//   - [price-graph-button][item-jsdr]
-// - Kindle Store Page (others)
-//   - horizontal
-//     - [price-graph-button]
-//     - onscroll (only manga-store)
-//   - manga-store ranking area
-//     - [price-graph-button]
-//   - octopus-search
-//     - [price-graph-button][item-jsdr][series-jsdr]
-//     - wait
-//   - grid12
-//     - [price-graph-button][item-jsdr]
-//     - wait
 // - Kindle Author Page
+//   - Kindle Author Component
+//   - Kindle Horizontal Component
+//     - observe
+// - Kindle Ranking Page
+//   - insert:[price-graph-button][item-jsdr]
+//   - observe
+// - Kindle Grid30 Page
+//   - insert:[price-graph-button][item-jsdr]
+// - Kindle Octopus Page
+//   - Kindle Horizontal Component
+//   - Kindle Octopus Component
+// - Kindle Grid12 Page
+//   - Kindle Horizontal Component
+//   - Kindle Grid12 Component
+//     - observe
+// - Kindle Manga Store Page
+//   - Kindle Horizontal Component
+//     - observe
+// - Kindle Store Page (others)
+//   - Kindle Horizontal Component
+//
+// Components:
+// - Kindle Author Component
 //   - [price-graph-button][item-jsdr]
+// - Kindle Octopus Component
+//   - [price-graph-button][item-jsdr][series-jsdr]
+// - Kindle Grid12 Component
+//   - [price-graph-button][item-jsdr]
+// - Kindle Horizontal Component
+//   - General Carousel
+//     - [price-graph-button]
+//   - Manga Store Ranking Carousel
+//     - [price-graph-button]
 //
 
-KS_IF_API = 'https://www.listasin.net/api/0000/chex/';
-KS_JD_API = 'https://www.listasin.net/api/0199_jd.cgi?asins=';
+KS_IF_API = 'https://www.listasin.net/api/0000/chex/'; // iframe
+KS_JD_API = 'https://www.listasin.net/api/0199_jd.cgi?asins='; // json
 DEBUG_API = 'https://www.listasin.net/api/debug-logging.cgi?asins=';
 
-num_of_items_in_manga_store = 0;
-document.onscroll = function() {
-    if (/manga-store/.test(location.href)) {
-        let n = Array.from(document.querySelectorAll('li a[href*="/dp/B"]')).length
-        //console.log(num_of_items_in_manga_store, n);
-        if (num_of_items_in_manga_store != n) {
-            num_of_items_in_manga_store = n;
-            kindle_horizontal_component();
-        }
-        return;
-    }
-}    
+async function main() {
 
+    const config = { childList: true, subtree: true };
 
-if (document.getElementById('ASIN')) {
+    if (document.getElementById('ASIN')) {
 
-    console.log("kiseppe: here is Kindle ASIN Page");
-    kindle_asin_page();
+        console.log("kiseppe: here is Kindle ASIN Page");
+        kindle_asin_page();
 
-} else if (/一覧.+著者/.test(document.querySelector('title').textContent)) {
+    } else if (document.querySelector('div[id="browse-views-area"] div[class*="browse-clickable-item"]')) {
 
-    console.log("kiseppe: here is Kindle Author Page");
-    kindle_author_page();
+        console.log("kiseppe: here is Kindle Grid30 Page");
+        kindle_grid30_page();
 
-} else if (document.querySelector('div[id="browse-views-area"] div[class*="browse-clickable-item"]')) {
+    } else if (document.querySelector('[data-card-metrics-id*="octopus-search-result-card_"')) {
 
-    console.log("kiseppe: here is Kindle Grid30 Page");
-    kindle_grid30_page();
+        console.log("kiseppe: here is Kindle Octpus Page");
+        kindle_horizontal_component();
+        kindle_octopus_component();
 
-} else if (document.querySelector('[data-card-metrics-id*="octopus-search-result-card_"')) {
+    } else if (/一覧.+著者/.test(document.querySelector('title').textContent)) {
 
-    console.log("kiseppe: here is Octpus Component");
-    kindle_octopus_component();
-    kindle_horizontal_component();
+        console.log("kiseppe: here is Kindle Author Page");
+        await kindle_horizontal_component();
+        kindle_author_component();
 
-} else if (document.querySelector('div[class*="result-section"]') &&
-           document.querySelector('div[id=search-results]')) {
+        const e = document.querySelector('#authorPageBooks');
+        const callback = async function (mutations) {
+            console.log('rebuild author');
+            observer.disconnect(); // 監視終了
+            await kindle_horizontal_component();
+            console.log('rebuild author end');
+            observer.observe(e, config); // 監視開始
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
+        
+    } else if (document.querySelector('div[class*="result-section"]') &&
+               document.querySelector('div[id=search-results]')) {
 
-    console.log("kiseppe: here is Grid12 Component");
-    let e = document.querySelector('div[id=search-results]').parentNode;
-    // 検索結果の動的表示の監視 - grid12
-    let config = {
-        childList: true,
-        subtree: true
-    };
-    let observer = new MutationObserver(async function (mutations) {
-        console.log('I\'m observing you!');
-        //if (e.querySelector('.kiseppe-pg-btn')) return;
-        console.log('rebuild grid12');
-        observer.disconnect(); // 監視終了
+        console.log("kiseppe: here is Grid12 Page");
+        kindle_horizontal_component();
         await kindle_grid12_component();
-        console.log('rebuild grid12 end');
-        observer.observe(e, config); // 監視開始
-    });
-    kindle_grid12_component();
-    observer.observe(e, config);
-    kindle_horizontal_component();
 
-} else if (document.querySelector('[data-collection-asin]')) {
+        const e = document.querySelector('div[id=search-results]').parentNode;
+        const callback = async function (mutations) {
+            console.log('rebuild grid12');
+            observer.disconnect(); // 監視終了
+            await kindle_grid12_component();
+            console.log('rebuild grid12 end');
+            observer.observe(e, config); // 監視開始
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
 
-    console.log("kiseppe: here is Kindle Series Page");
-    // 検索結果の動的表示の監視 - series
-    let e = document.querySelector('div[id=series-childAsin-widget]');
-    let config = {
-        childList: true,
-        subtree: true
-    };
-    let observer = new MutationObserver(async function (mutations) {
-        console.log('I\'m observing you!');
-        //if (e.querySelector('.kiseppe-pg-btn')) return;
-        observer.disconnect(); // 監視終了
-        console.log('[vvv] rebuild series');
+    } else if (document.querySelector('[data-collection-asin]')) {
+
+        console.log("kiseppe: here is Kindle Series Page");
         await kindle_series_page();
-        console.log('[^^^] rebuild series end');
-        observer.observe(e, config); // 監視開始
-    });
-    kindle_series_page();
-    observer.observe(e, config);
 
-} else if (document.querySelector('div#search') &&
-           document.querySelector('div#nav-subnav[data-category="digital-text"]')
-          ) {
+        const e = document.querySelector('div[id=series-childAsin-widget]');
+        const callback = async function (mutations) {
+            observer.disconnect(); // 監視終了
+            console.log('[vvv] rebuild series');
+            await kindle_series_page();
+            console.log('[^^^] rebuild series end');
+            observer.observe(e, config); // 監視開始
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
 
-    console.log("kiseppe: here is Kindle Search Page");
-    let e = document.querySelector('div#search');
-    // 検索結果の動的表示の監視 - search
-    let config = {
-        childList: true,
-        subtree: true
-    };
-    let observer = new MutationObserver(async function (mutations) {
-        console.log('I\'m observing you!');
-        if (e.querySelector('.kiseppe-pg-btn')) return;
-        observer.disconnect(); // 監視終了
-        console.log('[vvv] rebuild search');
+    } else if (document.querySelector('div#nav-subnav[data-category="digital-text"]') &&
+               document.querySelector('div#search')) {
+
+        console.log("kiseppe: here is Kindle Search Page");
         await kindle_search_page();
-        console.log('[^^^] rebuild search end');
-        observer.observe(e, config); // 監視開始
-    });
-    observer.observe(e, config);
+        
+        const e = document.querySelector('div#search');
+        const callback = async function (mutationsList, observer) {
+            observer.disconnect(); // 監視終了
+            console.log('[vvv] rebuild search');
+            await kindle_search_page();
+            console.log('[^^^] rebuild search end');
+            observer.observe(e, config); // 監視開始
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
 
-} else if (/(new-releases|bestsellers|movers-and-shakers)\/digital-text/.test(location.href)) {
+    } else if (/(new-releases|bestsellers|movers-and-shakers)\/digital-text/.test(location.href)) {
 
-    console.log("kiseppe: here is Kindle Ranking Page");
-    // 動的表示の監視 - ranking
-    e = document.querySelector('div.p13n-desktop-grid');
-    let config = {
-        childList: true,
-        subtree: true
-    };
-    let observer = new MutationObserver(async function (mutations) {
-        console.log('I\'m observing you!');
-        console.log('[vvv] rebuild search');
-        observer.disconnect(); // 監視終了
+        console.log("kiseppe: here is Kindle Ranking Page");
         await kindle_ranking_page();
-        console.log('[^^^] rebuild search end');
-        observer.observe(e, config); // 監視開始
-    });
-    kindle_ranking_page();
-    observer.observe(e, config);
 
-} else if (document.querySelector('#nav-subnav[data-category=digital-text]')) {
+        const e = document.querySelector('div.p13n-desktop-grid');
+        const callback = async function (mutations) {
+            console.log('[vvv] rebuild search');
+            observer.disconnect(); // 監視終了
+            await kindle_ranking_page();
+            console.log('[^^^] rebuild search end');
+            observer.observe(e, config); // 監視開始
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
 
-    console.log("kiseppe: here is Kindle Horizontal Component");
-    kindle_horizontal_component();
+    } else if (/manga-store/.test(location.href)) {
 
-} else {
+        console.log("kiseppe: here is Kindle Manga Store Page");
+        kindle_horizontal_component();
 
+        const e = document.querySelector('.msw-page');
+        const excludeNode = document.querySelector(
+            '.msw-page > div > div[data-csa-c-painter="banner-carousel-cards"]'
+        );
+        const callback = async function (mutationsList, observer) {
+            let is_mutation_detected = 0;
+            for (let mutation of mutationsList) {
+                if (excludeNode.contains(mutation.target)) continue;
+                is_mutation_detected = 1;
+                break;
+            }
+            if (! is_mutation_detected) return;
+            console.log('[vvv] rebuild manga-store');
+            observer.disconnect(); // 監視終了
+            await kindle_horizontal_component();
+            console.log('[^^^] rebuild manga-store end');
+            observer.observe(e, config); // 監視開始
+        };
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
+
+    } else if (document.querySelector('#nav-subnav[data-category=digital-text]')) {
+
+        console.log("kiseppe: here is Kindle Store Page (Others)");
+        kindle_horizontal_component();
+
+    } else {
+
+    }
 }
 
+main();
 
-//
-// Kindle ASIN page
-//
+//// Kindle ASIN page
 // Ex. https://www.amazon.co.jp/dp/B0C5QMW1JY
 async function kindle_asin_page() {
     const asin = document.getElementById('ASIN').value;
-    if (/^B[0-9A-Z]{9}$/.test(asin)) {
-        // call kiseppe 1.0 (kiseppe1.0::main() => asin_page_main())
-        asin_page_main();
-        // build API url
-        let c = document.querySelector("a[href*='binding=kindle_edition']");
-        if (! c) return;
-        let r = c.getAttribute('href').match(/(B0[0-9A-Z]{8})/);
-        let collection_asin = r[0];
-        const url = `${KS_JD_API}COL_${collection_asin},${asin}`;
-        console.log(url);
-        // access to API
-        await fetch(url).then(r => r.json()).then(res => {
-            console.log(res['result']['series']);
-            const sd = res['result']['series'][collection_asin];
-            //// case: real discount rate >= 15%
-            if (sd && Number(sd) >= 15)
-                show_series_sale_badge(c);
-        });
-        return;
-    }
+    if (! /^B[0-9A-Z]{9}$/.test(asin)) return;
+    
+    // call kiseppe 1.0 (kiseppe1.0::main() => asin_page_main())
+    asin_page_main();
+
+    // build API url
+    let c = document.querySelector("a[href*='binding=kindle_edition']");
+    if (! c) return;
+    let r = c.getAttribute('href').match(/(B[0-9A-Z]{9})/);
+    let collection_asin = r[0];
+    const url = `${KS_JD_API}COL_${collection_asin},${asin}`;
+    console.log(url);
+    // access to API
+    await fetch(url).then(r => r.json()).then(res => {
+        console.log(res['result']['series']);
+        const sd = res['result']['series'][collection_asin];
+        //// case: real discount rate >= 15%
+        if (sd && Number(sd) >= 15)
+            show_series_sale_badge(c);
+    });
+    return;
 }
 
 
-//
-// Kindle Author page
-//
+//// Kindle Author Component
 // Ex. https://www.amazon.co.jp/kindle-dbs/entity/author/B004L41ULY
-async function kindle_author_page() {
+async function kindle_author_component() {
     // collect ASINs for API access and put price graph buttons
     const alist = [];
     document.querySelectorAll(
@@ -216,10 +241,6 @@ async function kindle_author_page() {
         // put a price graph button
         let item_title = c.getAttribute('aria-label');
         let pgd = build_price_graph_dialog(asin, item_title);
-        pgd.style.position = "absolute";
-        pgd.style.bottom = "0";
-        pgd.style.left = "0";
-        pgd.style.zIndex = "10000";
         cntn.style.position = "relative";
         cntn.appendChild(pgd);
     });
@@ -252,9 +273,7 @@ async function kindle_author_page() {
 }
 
 
-//
-// is Kindle Grid30 Page?
-//
+//// Kindle Grid30 Page
 // グリッド表示
 // Ex. https://www.amazon.co.jp/kindle-dbs/browse?metadata=cardAppType&storeType=ebooks&sourceType=recs&widgetId=unified-ebooks-storefront-default_KindleUnlimitedCrossCategoryStrategyEbookSources
 async function kindle_grid30_page() {
@@ -297,11 +316,6 @@ async function kindle_grid30_page() {
             if (item_title) {
                 // put a price graph button
                 let pgd = build_price_graph_dialog(asin, item_title);
-                //e.parentNode.prepend(pgd);
-                pgd.style.position = "absolute";
-                pgd.style.bottom = "0";
-                pgd.style.left = "0";
-                pgd.style.zIndex = "10000";
                 cntn.querySelector('div').style.position = "relative";
                 cntn.querySelector('div').appendChild(pgd);
                 
@@ -326,7 +340,7 @@ async function kindle_grid30_page() {
 }
 
 
-//// octopus_component
+//// Kindle Octopus Component
 // 特設ページなどの下の方に12個固定で表示されるやつ
 // Ex. https://www.amazon.co.jp/b?node=22083216051
 async function kindle_octopus_component() {
@@ -389,13 +403,6 @@ async function kindle_octopus_component() {
             let item_title = e.textContent;
             if (! item_title) return;
             let pgd = build_price_graph_dialog(asin, item_title);
-            pgd.style.paddingRight = "3px";
-            //pgd.style.fontSize = "large";
-            //e.parentNode.prepend(pgd);
-            pgd.style.position = "absolute";
-            pgd.style.bottom = "0";
-            pgd.style.left = "0";
-            pgd.style.zIndex = "10000";
             cntn.style.position = "relative";
             cntn.appendChild(pgd);
 
@@ -425,7 +432,7 @@ async function kindle_octopus_component() {
 }
 
 
-//// Grid12
+//// Kindle Grid12 Component
 // 「セール＆キャンペーン」ページなどで表示される検索結果表示
 // Ex. https://www.amazon.co.jp/hko/deals/?_encoding=UTF8
 async function kindle_grid12_component() {
@@ -467,10 +474,6 @@ async function kindle_grid12_component() {
             item_title = e.querySelector('img[alt]').getAttribute('alt');
             if (! item_title) return;
             let pgd = build_price_graph_dialog(asin, item_title);
-            pgd.style.position = "absolute";
-            pgd.style.bottom = "0";
-            pgd.style.left = "0";
-            pgd.style.zIndex = "10000";
             c.style.position = "relative";
             c.appendChild(pgd);
 
@@ -489,9 +492,7 @@ async function kindle_grid12_component() {
 }
 
 
-//
-// is Kindle Series Page?
-//
+//// Kindle Series Page
 // ("collection" means "series")
 async function kindle_series_page() {
     let srasin =
@@ -542,12 +543,6 @@ async function kindle_series_page() {
                 // put a price graph button
                 let item_title = co.getAttribute('title');
                 let pgd = build_price_graph_dialog(asin, item_title);
-                //co.parentNode.appendChild(pgd);
-                //cntn.querySelector('div[class*=series-childAsin-count').appendChild(pgd);
-                pgd.style.position = "absolute";
-                pgd.style.bottom = "0";
-                pgd.style.left = "0";
-                pgd.style.zIndex = "10000";
                 cntn.style.position = "relative";
                 cntn.appendChild(pgd);
 
@@ -589,11 +584,6 @@ async function kindle_ranking_page() {
         // put a price graph button
         let item_title = co.querySelector('img').getAttribute('alt');
         let pgd = build_price_graph_dialog(asin, item_title);
-        //co.appendChild(pgd);
-        pgd.style.position = "absolute";
-        pgd.style.bottom = "0";
-        pgd.style.left = "0";
-        pgd.style.zIndex = "10000";
         e.style.position = "relative";
         e.appendChild(pgd);
     });
@@ -630,9 +620,7 @@ async function kindle_ranking_page() {
 }
 
 
-//
-// is Kindle Search Page?
-//
+//// Kindle Search Page
 // Ex. https://www.amazon.co.jp/s?rh=n%3A2410280051&fs=true
 async function kindle_search_page() {
 
@@ -665,13 +653,6 @@ async function kindle_search_page() {
         // put a price graph button
         let item_title = e.querySelector('h2').textContent;
         let pgd = build_price_graph_dialog(asin, item_title);
-        //pgd.style.paddingRight = "3px";
-        //pgd.style.fontSize = "large";
-        //e.querySelector('h2').prepend(pgd);
-        pgd.style.position = "absolute";
-        pgd.style.bottom = "0";
-        pgd.style.left = "0";
-        pgd.style.zIndex = "10000";
         const c = e.querySelector('div[cel_widget_id]');
         c.style.position = "relative";
         c.appendChild(pgd);
@@ -723,80 +704,83 @@ async function kindle_search_page() {
 }
 
 
-//
-// is Kindle Horizontal Component
-//
+//// Kindle Horizontal Component
 async function kindle_horizontal_component() {
 
-    // get all ASINs
-    let aset = new Set();
-    document.querySelectorAll("a[href]").forEach(e => {
-        const url = e.getAttribute('href');
-        const r = url.match(/\/(B0[0-9A-Z]{8})/);
-        if (r) aset.add(r[1]);
-    });
-    console.log("aset:", aset.size, aset);
-    let asins = Array.from(aset);
-
-    asins.forEach(asin => {
-
+    // manga store ranking carousel
+    const qs_ranking_area =
+          'div[class^="_manga-genre-ranking-card_style_grid-container"]';
+    if (document.querySelector(qs_ranking_area)) {
+        let ca = document.querySelector(qs_ranking_area);
         //// manga-store ranking area
-        // マンガストアトップ横スクロール表示 => ページの動的読み込みあり
+        // マンガストアトップ ランキング横スクロール表示
         // Ex. https://www.amazon.co.jp/kindle-dbs/manga-store/
-        Array.from(document.querySelectorAll(
-            `a[href*="/dp/${asin}"] img[class*="_manga-genre-ranking-card_retail-item-style_book-cover"]`
-        )).forEach(e => {
-            console.log('kiseppe: manga-store ranking area', asin, e);
+        ca.querySelectorAll(
+            `a[href*="/dp/B"] img[class*="_manga-genre-ranking-card_retail-item-style_book-cover"]`
+        ).forEach(e => {
+
+            ca.style.border = 'dashed 2px green';
+
+            let r = e.closest('a').getAttribute('href').match(/(B[0-9A-Z]{9})/);
+            let asin = r[0];
             let cntn = e.closest('div[id^="grid-item_"]');
+            if (cntn.querySelector('.kiseppe-pg-btn')) return;
             // vvv  manga-store mateba-muryou's likes icon
             if (cntn.querySelector('img[alt="likes icon"]')) return;                
-            if (cntn.querySelector('.kiseppe-pg-btn')) return;
+            console.log('kiseppe: manga-store ranking area', asin, e);
             let item_title = e.getAttribute('alt');
             if (item_title) {
                 // put a price graph button
                 let pgd = build_price_graph_dialog(asin, item_title);
-                pgd.style.position = "absolute";
-                pgd.style.bottom = "0";
-                pgd.style.left = "0";
-                pgd.style.zIndex = "10000";
                 cntn.style.position = "relative";
                 cntn.appendChild(pgd);
             }
         });
+
+    }
+
+    // general carousel
+    // カテゴリTOP: div[class*="octopus-pc-card-content"]
+    const qs_carousel =
+          'div[class="a-carousel-row-inner"], ' +
+          'div[class*="octopus-pc-card-content"]';
+    document.querySelectorAll(qs_carousel).forEach(ca => {
+
+        ca.style.border = 'dashed 2px red';
 
         //// horizontal
         // キンドルトップ横スクロール表示
         // Ex. https://www.amazon.co.jp/s?node=2275256051
         // 横並びだけどスクロールしないやつ
         // Ex. https://www.amazon.co.jp/b?node=2292699051
-        Array.from(document.querySelectorAll(
-            `li a[href*="/dp/${asin}"] img[alt], li a[href^="/gp/product/${asin}"] img[alt]`
-        )).forEach(e => {
+        ca.querySelectorAll(
+            `li a[href*="/dp/B"] img[alt], li a[href^="/gp/product/B"] img[alt]`
+        ).forEach(e => {
+            let r = e.closest('a').getAttribute('href').match(/(B[0-9A-Z]{9})/);
+            let asin = r[0];
+
             //console.log('kiseppe: horizontal', asin, e);
             if (/image-ku/.test(e.getAttribute('src'))) return;
-            let cntn = e.closest('li');
+            let cntn = e.closest('div[class^="_manga-store-shoveler_style_item-row-"]'); // two rows
+            if (! cntn) cntn = e.closest('li');
+            if (cntn.querySelector('.kiseppe-pg-btn')) return;
             // vvv  manga-store big banner
             if (/banner-/.test(cntn.getAttribute("class"))) return;
             // vvv  manga-store mateba-muryou's likes icon
             if (cntn.querySelector('img[alt="likes icon"]')) return;                
             // vvv  manga-store collection ASIN
             if (cntn.querySelector('span[class*="collection-type"]')) return;
-            if (cntn.querySelector('.kiseppe-pg-btn')) return;
             //console.log('kiseppe: horizontal', asin);
             let item_title = e.getAttribute('alt');
             if (item_title) {
                 // put a price graph button
                 let pgd = build_price_graph_dialog(asin, item_title);
-                pgd.style.position = "absolute";
-                pgd.style.bottom = "0";
-                pgd.style.left = "0";
-                pgd.style.zIndex = "10000";
                 cntn.style.position = "relative";
                 cntn.appendChild(pgd);
             }
         });
     });
-
+    
     return;
 };
 
@@ -849,11 +833,13 @@ function show_series_sale_badge(e) {
 // (generates a dialog to display a Price Graph iframe)
 //
 function build_price_graph_dialog(asin, title) {
-    //console.log('hello');
 
     // button to display a price graph <dialog>
     let d = document.createElement('span');
     d.classList.add("kiseppe-pg-btn");
+    d.style.position = "absolute";
+    d.style.bottom = "0";
+    d.style.left = "0";
     d.style.zIndex = "100000";
     d.style.cursor = "pointer";
     d.innerText = '📊';
