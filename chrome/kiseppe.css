@@ -1,0 +1,77 @@
+/*
+  for DEBUG
+*/
+.kiseppe-debug {
+    border: dashed 2px rgba(255,0,0,0.7);
+}
+
+/*
+  price graph iframe
+*/
+#kiseppe {
+    width: 100%;
+    height: 0px;
+    border: 0;
+    overflow: hidden;
+    border: dashed 2px rgba(255,0,255,0.7);
+}
+
+/*
+  badges and buttons
+*/
+.kiseppe-jsdr-badge {
+    position: absolute;
+    padding: 2px 4px;
+    line-height: 1.2em;
+    text-align: center;
+    font-size: x-small;
+    background-color: brown;
+    color: white;
+
+    border: dashed 2px rgba(255,0,255,0.7);
+}
+.kiseppe-series-sale-badge {
+    border: dashed 2px rgba(255,0,255,0.7);
+}
+.kiseppe-pg-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 100000;
+    cursor: pointer;
+
+    border: dashed 2px rgba(255,0,255,0.7);
+}
+
+/*
+  price graph popup
+*/
+dialog#popup_modal {
+    border: none;
+    border-radius: 8px;
+}
+dialog#popup_modal::backdrop {
+    background: rgba(0,0,0,.5);
+}
+#popup_modal #pg_container {
+    width: 850px;
+    text-align: center; }
+#popup_modal #pg_container .pg_item_info {
+    height: 400px;
+}
+#popup_modal #pg_container .pg_item_title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+#popup_modal #pg_container iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    overflow: visible;
+}
+
+
+

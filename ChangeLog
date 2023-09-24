@@ -1,5 +1,7 @@
 2023-09-24  Tatsuwo  <yto at example.com>
 
+	* chrome/kiseppe.css: new!
+
 	* chrome/content-script.js:
 	- MutationObserver 完全に理解した（）
 	- 処理する対象を page と component にわけて整理した
