@@ -13,7 +13,7 @@ Kindle セール情報サイト「キンセリ」のブラウザ拡張機能で�
 また、セール対象作品の場合はキンセリのセールまとめページへのリンクも表示します（データがあれば）。
 
 - [Kiseppe - Price Chart for Amazon Japan Kindle - Chrome ウェブストア](https://chrome.google.com/webstore/detail/kiseppe-price-chart-for-a/jhmbgbjpbiiklgmfabbcldoddlljplle) (2023/3/16 JST 公開)
-- [Kiseppe - Kindle Price Chart – 🦊 Firefox (ja) 向け拡張機能を入手](https://addons.mozilla.org/ja/firefox/addon/kiseppe-price-chart-kindle/)
+- [Kiseppe - Kindle Price Chart – 🦊 Firefox (ja) 向け拡張機能を入手](https://addons.mozilla.org/ja/firefox/addon/kiseppe-price-chart-kindle/) (2023/3/19 JST 公開)
 
 ## 注意
 

@@ -1,4 +1,3 @@
-
 // Kiseppe's target pages
 //
 // Pages:
@@ -45,7 +44,6 @@
 //     - [price-graph-button]
 //   - Manga Store Ranking Carousel
 //     - [price-graph-button]
-//
 
 const KS_IF_API = 'https://www.listasin.net/api/0000/chex/'; // iframe
 const KS_JD_API = 'https://www.listasin.net/api/0199_jd.cgi?asins='; // json
@@ -55,15 +53,14 @@ const JSDR_CUTOFF = 15;
 async function main() {
 
     const config = { childList: true, subtree: true };
-    const generate_callback = (e, f) =>
-          async function (mutations, observer) {
-              // stop observation, do f(), and restart observation
-              observer.disconnect(); // stop observation
-              console.log('rebuild start');
-              await f();
-              console.log('rebuild end');
-              observer.observe(e, config); // restart observation
-          };
+    const generate_callback = (e, f) => async function (mutations, observer) {
+        // stop observation, do f(), and restart observation
+        observer.disconnect(); // stop observation
+        console.log('rebuild start');
+        await f();
+        console.log('rebuild end');
+        observer.observe(e, config); // restart observation
+    };
     
     if (document.getElementById('ASIN')) {
 
@@ -168,19 +165,6 @@ async function main() {
 
 main();
 
-function get_asin_in_href(e) {
-    let asin = '';
-    if (! e || ! e.getAttribute('href')) return asin;
-    const r = e.getAttribute('href').match(/(B[0-9A-Z]{9})/);
-    if (r) asin = r[0];
-    return asin;
-}
-
-function get_series_asin(e) {
-    const c = e.querySelector("a[href*='binding=kindle_edition']");
-    const srasin = get_asin_in_href(c);
-    return [srasin, c];
-}
 
 //// Kindle ASIN page
 // Ex. https://www.amazon.co.jp/dp/B0C5QMW1JY
@@ -193,6 +177,7 @@ async function kindle_asin_page() {
 
     // build API url
     const [collection_asin, c] = get_series_asin(document.body);
+    if (! collection_asin) return;
     const url = `${KS_JD_API}COL_${collection_asin},${asin}`;
     console.log(url);
     // access to API
@@ -215,18 +200,12 @@ async function kindle_author_component() {
         'div[id=searchWidget] > div:not([role])'
     ).forEach(cntn => {
         if (cntn.querySelector('.kiseppe-pg-btn')) return;
-        
         const c = cntn.querySelector('a[aria-label][href*="/B"]');
         if (! c) return; // not Kindle book
-	const asin = get_asin_in_href(c);
-	alist.push(asin);
+        const asin = get_asin_in_href(c);
+        alist.push(asin);
         cntn.dataset.asin = asin;
-        
-        // put a price graph button
-        const item_title = c.getAttribute('aria-label');
-        const pgd = build_price_graph_dialog(asin, item_title);
-        cntn.style.position = "relative";
-        cntn.appendChild(pgd);
+	put_price_graph_button(cntn, asin, c.getAttribute('aria-label'));
     });
     if (alist.length == 0) return;
     
@@ -244,9 +223,7 @@ async function kindle_author_component() {
             if (Number(ri[asin]) >= JSDR_CUTOFF) {
                 const ca = cntn.querySelector('a[aria-label]');
                 show_jsdr_badge(ca, ri[asin], "0", "0");
-                // change background color
-                const toumei = Number(ri[asin]) / 100 * 0.2;
-                cntn.style.backgroundColor = `rgba(255,0,0,${toumei})`;
+		change_background_color(cntn, Number(ri[asin]))
             }
         });
     });
@@ -264,20 +241,19 @@ async function kindle_grid30_page() {
     // get all ASINs
     const aset = new Set();
     document.querySelectorAll(qs_grid30).forEach(e => {
-	const asin = get_asin_in_href(e.querySelector('a[href*="/B"]'));
-	if (asin) aset.add(asin);
+        const asin = get_asin_in_href(e.querySelector('a[href*="/B"]'));
+        if (asin) aset.add(asin);
     });
     console.log("aset:", aset.size, aset);
     const asins = Array.from(aset);
     
-    let res = {};
     let ri = {};
     if (asins.length > 0) {
         //// build API url and access
         const url = KS_JD_API + asins.flat().join(",");
         console.log(url);
         try {
-            res = await fetch(url).then(r => r.json());
+            const res = await fetch(url).then(r => r.json());
             ri = res['result']['items'];
         } catch (error) {
             console.error(error);
@@ -285,32 +261,19 @@ async function kindle_grid30_page() {
     }
     
     asins.forEach(asin => {
-        Array.from(document.querySelectorAll(
+        document.querySelectorAll(
             qs_grid30 + ` a[href^="/gp/product/${asin}"][aria-label]`
-        )).forEach(e => {
+        ).forEach(e => {
             console.log(asin, e);
             const cntn = e.closest('div[class*="browse-clickable-item"]');
             if (cntn.querySelector('.kiseppe-pg-btn')) return;
-            const item_title = e.getAttribute('aria-label')
-            if (item_title) {
-                // put a price graph button
-                const pgd = build_price_graph_dialog(asin, item_title);
-                cntn.querySelector('div').style.position = "relative";
-                cntn.querySelector('div').appendChild(pgd);
-
-                if (ri[asin] && Number(ri[asin]) >= JSDR_CUTOFF) {
-                    show_jsdr_badge(cntn, ri[asin], "0", "0");
-                    // change background color
-                    const toumei = Number(ri[asin]) / 100 * 0.2;
-                    if (cntn.querySelector('div[class*="grid-view-item-unit"]')) {
-                        cntn.style.background =
-                            `linear-gradient(rgba(255,0,0,${toumei}), 80%, white)`;
-                    } else {
-                        cntn.style.backgroundColor = `rgba(255,0,0,${toumei})`;
-                    }
-                }
-            }
-        });
+	    const item_title = e.getAttribute('aria-label');
+	    put_price_graph_button(cntn.querySelector('div'), asin, item_title);
+	    if (ri[asin] && Number(ri[asin]) >= JSDR_CUTOFF) {
+                show_jsdr_badge(cntn, ri[asin], "0", "0");
+		change_background_color(cntn, Number(ri[asin]), 'g');
+	    }
+	});
     });
     
     return;
@@ -330,16 +293,15 @@ async function kindle_octopus_component() {
     const aslist = [];
     const calist = [];
     e.querySelectorAll("h2 a[href]").forEach(e => {
-	const asin = get_asin_in_href(e);
+        const asin = get_asin_in_href(e);
         if (! asin) return;
-	const cntn = e.closest('div[class*="s-card-container"]');
-	const [srasin, seri] = get_series_asin(cntn);
-	if (srasin) calist.push(...['COL_' + srasin, asin]);
-	else aslist.push(asin);
+        const cntn = e.closest('div[class*="s-card-container"]');
+        const [srasin, seri] = get_series_asin(cntn);
+        if (srasin) calist.push(...['COL_' + srasin, asin]);
+        else aslist.push(asin);
         aset.add(asin);
     });
 
-    let res = {};
     let ri = {};
     let rs = {};
     if (aslist.length > 0) {
@@ -348,7 +310,7 @@ async function kindle_octopus_component() {
         console.log(url);
         // access to API
         try {
-            res = await fetch(url).then(r => r.json());
+            const res = await fetch(url).then(r => r.json());
             ri = res['result']['items'];
             rs = res['result']['series'];
         } catch (error) {
@@ -368,24 +330,17 @@ async function kindle_octopus_component() {
         const cntn = e.closest('div[class*="s-card-container"]');
         console.log(cntn);
 
-        // put a price graph button
         if (cntn.querySelector('.kiseppe-pg-btn')) return;
-        const item_title = e.textContent;
-        if (! item_title) return;
-        const pgd = build_price_graph_dialog(asin, item_title);
-        cntn.style.position = "relative";
-        cntn.appendChild(pgd);
+	put_price_graph_button(cntn, asin, e.textContent);
 
-	const [srasin, seri] = get_series_asin(cntn);
+        const [srasin, seri] = get_series_asin(cntn);
         if (srasin && rs && rs[srasin] && Number(rs[srasin]) >= JSDR_CUTOFF)
             show_series_sale_badge(seri);
 
         if (ri[asin] && Number(ri[asin]) >= JSDR_CUTOFF) {
             show_jsdr_badge(cntn, ri[asin], "0", "0");
-            // change background color
-            const toumei = Number(ri[asin]) / 100 * 0.2;
-            cntn.style.backgroundColor = `rgba(255,0,0,${toumei})`;
-        }
+	    change_background_color(cntn, Number(ri[asin]));
+	}
 
     });
 
@@ -401,13 +356,12 @@ async function kindle_grid12_component() {
     // get all ASINs
     const aset = new Set();
     document.querySelectorAll('div[class*="asin-container"] a[href]').forEach(e => {
-	const asin = get_asin_in_href(e);
+        const asin = get_asin_in_href(e);
         if (asin) aset.add(asin);
     });
     console.log("aset:", aset.size, aset);
     const asins = Array.from(aset);
 
-    let res = {};
     let ri = {};
     if (asins.length > 0) {
         // build API url
@@ -415,7 +369,7 @@ async function kindle_grid12_component() {
         console.log(url);
         // access to API
         try {
-            res = await fetch(url).then(r => r.json());
+            const res = await fetch(url).then(r => r.json());
             ri = res['result']['items'];
         } catch (error) {
             console.error(error);
@@ -428,22 +382,13 @@ async function kindle_grid12_component() {
         )) {
             console.log('kiseppe: Grid12', asin);
             const c = e.closest('div[class*="asin-container"]');
-
-            // put a price graph button
             if (c.querySelector('.kiseppe-pg-btn')) return;
             const item_title = e.querySelector('img[alt]').getAttribute('alt');
-            if (! item_title) return;
-            const pgd = build_price_graph_dialog(asin, item_title);
-            c.style.position = "relative";
-            c.appendChild(pgd);
-
+	    put_price_graph_button(c, asin, item_title);
             if (ri[asin] && Number(ri[asin]) >= JSDR_CUTOFF) {
                 show_jsdr_badge(c, ri[asin], "0", "0");
-                // change background color
-                const toumei = Number(ri[asin]) / 100 * 0.3;
-                c.style.background =
-                    `linear-gradient(rgba(255,0,0,${toumei}), 80%, white)`;
-            }
+		change_background_color(c, Number(ri[asin]), 'g');
+	    }
         }
     });
     return;
@@ -462,13 +407,13 @@ async function kindle_series_page() {
     const aset = new Set();
     document.querySelectorAll('[data-ajax-url*="B"]').forEach(e => {
         const r = e.getAttribute('data-ajax-url').match(/(B[0-9A-Z]{9})/g);
-	r.forEach(s => aset.add(s));
+        r.forEach(s => aset.add(s));
     });
     // all items (in this series) displayed on this page
     document.querySelectorAll('div[id^="series-childAsin-item_"]').forEach(e => {
         const co = e.querySelector(`a[class*="itemImageLink"][role="img"]`);
-	const asin = get_asin_in_href(co);
-	if (asin) aset.add(asin);
+        const asin = get_asin_in_href(co);
+        if (asin) aset.add(asin);
     });
     console.log(aset);
     const asins = Array.from(aset);
@@ -496,18 +441,10 @@ async function kindle_series_page() {
                 if (! co) return;
                 const cntn = co.closest('div[id^="series-childAsin-item_"]');
                 if (cntn.querySelector('.kiseppe-pg-btn')) return;
-
-                // put a price graph button
-                const item_title = co.getAttribute('title');
-                const pgd = build_price_graph_dialog(asin, item_title);
-                cntn.style.position = "relative";
-                cntn.appendChild(pgd);
-
+		put_price_graph_button(cntn, asin, co.getAttribute('title'));
                 if (Number(ri[asin]) >= JSDR_CUTOFF) {
                     show_jsdr_badge(co, ri[asin], "0", "-4px");
-                    // change background color
-                    const toumei = Number(ri[asin]) / 100 * 0.2;
-                    cntn.style.backgroundColor = `rgba(255,0,0,${toumei})`;
+		    change_background_color(cntn, Number(ri[asin]));
                 }
             });
         });
@@ -535,12 +472,7 @@ async function kindle_ranking_page() {
         const co = e.querySelector('div[class^="p13n-sc-un"]');
         const asin = co.id;
         alist.push(asin);
-
-        // put a price graph button
-        const item_title = co.querySelector('img').getAttribute('alt');
-        const pgd = build_price_graph_dialog(asin, item_title);
-        e.style.position = "relative";
-        e.appendChild(pgd);
+	put_price_graph_button(e, asin, item_title);
     });
     const asins = alist.join(",");
     if (asins.length < 1) {
@@ -562,9 +494,7 @@ async function kindle_ranking_page() {
             const cntn = co.closest('div[data-a-card-type]');
             if (Number(ri[asin]) >= JSDR_CUTOFF) {
                 show_jsdr_badge(co, ri[asin], "0", "0");
-                // change background color
-                const toumei = Number(ri[asin]) / 100 * 0.2;
-                cntn.style.backgroundColor = `rgba(255,0,0,${toumei})`;
+		change_background_color(cntn, Number(ri[asin]));
             }
         });
     });
@@ -593,16 +523,13 @@ async function kindle_search_page() {
 
         const asin = e.dataset.asin;
 
-	const [srasin, seri] = get_series_asin(e);
+        const [srasin, seri] = get_series_asin(e);
         if (srasin) calist.push(...['COL_' + srasin, asin]);
-	else alist.push(asin);
+        else alist.push(asin);
 
-        // put a price graph button
         const item_title = e.querySelector('h2').textContent;
-        const pgd = build_price_graph_dialog(asin, item_title);
         const c = e.querySelector('div[cel_widget_id]');
-        c.style.position = "relative";
-        c.appendChild(pgd);
+	put_price_graph_button(c, asin, item_title);
     });
     const asins = [alist, calist].flat().join(",");
     if (asins.length < 1) {
@@ -623,20 +550,18 @@ async function kindle_search_page() {
         Object.keys(ri).forEach(asin => {
             const cntn = document.querySelector('div[data-asin="'+asin+'"]');
 
-	    const [srasin, seri] = get_series_asin(cntn);
+            const [srasin, seri] = get_series_asin(cntn);
             if (srasin && rs && rs[srasin] && Number(rs[srasin]) >= JSDR_CUTOFF)
                 show_series_sale_badge(seri);
             
             if (Number(ri[asin]) >= JSDR_CUTOFF) {
                 const x = cntn.querySelector('img').closest('.sg-col-inner');
                 show_jsdr_badge(x, ri[asin], "4px", "0");
-                // change background color
                 const c = cntn.querySelector('div[cel_widget_id]');
-                const toumei = Number(ri[asin]) / 100 * 0.2;
-                c.style.backgroundColor = `rgba(255,0,0,${toumei})`;
-                if (c = cntn.querySelector('div[class*="-badge-container"]'))
-                    c.style.backgroundColor = 'rgba(0,0,0,0)';
-            }
+		change_background_color(c, Number(ri[asin]));
+		const b = cntn.querySelector('div[class*="-badge-container"]');
+		if (b) change_background_color(b, 0);
+	    }
         });
     });
     
@@ -658,26 +583,16 @@ async function kindle_horizontal_component() {
         ca.querySelectorAll(
             `a[href*="/dp/B"] img[class*="_manga-genre-ranking-card_retail-item-style_book-cover"]`
         ).forEach(e => {
-
             ca.classList.add('kiseppe-debug');
-
-	    const asin = get_asin_in_href(e.closest('a'));
-
-	    const cntn = e.closest('div[id^="grid-item_"]');
+            const cntn = e.closest('div[id^="grid-item_"]');
             if (cntn.querySelector('.kiseppe-pg-btn')) return;
             // vvv  manga-store mateba-muryou's likes icon
             if (cntn.querySelector('img[alt="likes icon"]')) return;                
 
-            console.log('kiseppe: manga-store ranking area', asin, e);
-            const item_title = e.getAttribute('alt');
-            if (item_title) {
-                // put a price graph button
-                const pgd = build_price_graph_dialog(asin, item_title);
-                cntn.style.position = "relative";
-                cntn.appendChild(pgd);
-            }
-        });
-
+	    const asin = get_asin_in_href(e.closest('a'));
+            //console.log('kiseppe: manga-store ranking area', asin, e);
+	    put_price_graph_button(cntn, asin, e.getAttribute('alt'));
+	});
     }
 
     // general carousel
@@ -688,7 +603,6 @@ async function kindle_horizontal_component() {
           'div[class*="a-carousel-row-inner"], ' +
           'div[class*="octopus-pc-card-content"]'
     document.querySelectorAll(qs_carousel).forEach(ca => {
-
         ca.classList.add('kiseppe-debug');
 
         //// horizontal
@@ -697,12 +611,9 @@ async function kindle_horizontal_component() {
         // 横並びだけどスクロールしないやつ
         // Ex. https://www.amazon.co.jp/b?node=2292699051
         ca.querySelectorAll('li a[href*="/dp/B"] img[alt], ' +
-			    'li a[href^="/gp/product/B"] img[alt], ' + 
-			    'li a[href*="%2Fdp%2FB"] img[alt]'
-	).forEach(e => {
-	    const asin = get_asin_in_href(e.closest('a'));
-
-            //console.log('kiseppe: horizontal', asin, e);
+                            'li a[href^="/gp/product/B"] img[alt], ' + 
+                            'li a[href*="%2Fdp%2FB"] img[alt]'
+        ).forEach(e => {
             if (/image-ku/.test(e.getAttribute('src'))) return;
             let cntn = e.closest('div[class^="_manga-store-shoveler_style_item-row-"]'); // two rows
             if (! cntn) cntn = e.closest('li');
@@ -713,24 +624,47 @@ async function kindle_horizontal_component() {
             if (cntn.querySelector('img[alt="likes icon"]')) return;                
             // vvv  manga-store collection ASIN
             if (cntn.querySelector('span[class*="collection-type"]')) return;
-	    // vvv ASIN page non-kindle-books
+            // vvv ASIN page non-kindle-books
             if (cntn.querySelector('[class*="a-icon-prime"]')) return;
             if (cntn.querySelector('[data-endtime]')) return;
 
-	    //console.log('kiseppe: horizontal', asin);
-            const item_title = e.getAttribute('alt');
-            if (item_title) {
-                // put a price graph button
-                const pgd = build_price_graph_dialog(asin, item_title);
-                cntn.style.position = "relative";
-                cntn.appendChild(pgd);
-            }
+            const asin = get_asin_in_href(e.closest('a'));
+            //console.log('kiseppe: horizontal', asin);
+	    put_price_graph_button(cntn, asin, e.getAttribute('alt'));
         });
     });
     
     return;
 };
 
+
+//// Miscellaneous Small Functions
+function get_asin_in_href(e) {
+    if (! e || ! e.getAttribute('href')) return '';
+    const r = e.getAttribute('href').match(/(B[0-9A-Z]{9})/);
+    return r ? r[1] : '';
+}
+function get_series_asin(e) {
+    const c = e.querySelector("a[href*='binding=kindle_edition']");
+    const srasin = get_asin_in_href(c);
+    return [srasin, c];
+}
+function change_background_color(e, v, mode = "") { // 0 <= v <= 100
+    const toumei = v / 100 * 0.2;
+    const rgba = `rgba(255,0,0,${toumei})`;
+    if (mode == 'g') e.style.background = `linear-gradient(${rgba}, 80%, white)`;
+    else e.style.backgroundColor = rgba;
+}
+
+
+// put a price graph button
+function put_price_graph_button(e, asin, title) {
+    if (! title) return false;
+    const pgd = build_price_graph_dialog(asin, title);
+    e.style.position = "relative";
+    e.appendChild(pgd);
+    return true;
+}
 
 // 実質割引率バッジ
 // build and put a "real discount rate" budge
@@ -773,12 +707,12 @@ function show_series_sale_badge(e) {
 function build_price_graph_dialog(asin, title) {
 
     // button to display a price graph <dialog>
-    const b = document.createElement('span');
-    b.classList.add("kiseppe-pg-btn");
-    b.innerText = '📊';
+    const pgb = document.createElement('span');
+    pgb.classList.add("kiseppe-pg-btn");
+    pgb.innerText = '📊';
     
     // click => display a price graph <dialog>
-    b.addEventListener('click', (event) => {
+    pgb.addEventListener('click', (event) => {
 
         // build API url (returns a graph content for iframe)
         const url = KS_IF_API + asin + '--';
@@ -797,11 +731,11 @@ function build_price_graph_dialog(asin, title) {
         // insert a graph content wrapper to <dialog>
         pp.innerHTML = `
 <div id="pg_container">
- <div class="pg_item_info">
-  <div class="pg_item_title">${title}</div>
-  <iframe src="${url}" scrolling="no"></iframe>
- </div>
- <button onclick="document.getElementById('popup_modal').close()">Close</button>
+  <div class="pg_item_info">
+    <div class="pg_item_title">${title}</div>
+    <iframe src="${url}" scrolling="no"></iframe>
+  </div>
+  <button onclick="document.getElementById('popup_modal').close()">Close</button>
 </div>
 `;
         document.getElementById("popup_modal").showModal();
@@ -809,7 +743,7 @@ function build_price_graph_dialog(asin, title) {
         event.stopPropagation();
     });
 
-    return b;
+    return pgb;
 }
 
 
@@ -867,7 +801,7 @@ function asin_page_main() {
 
     // build iframe
     let new_elm = document.createElement('div');
-    new_elm.innerHTML = '<iframe src="' + url + '" scrolling="no" id="kiseppe"></iframe>';
+    new_elm.innerHTML = `<iframe src="${url}" scrolling="no" id="kiseppe"></iframe>`;
 
     // insert iframe
     let base_elm = document.getElementById('ATFCriticalFeaturesDataContainer');
