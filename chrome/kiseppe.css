@@ -2,7 +2,23 @@
   for DEBUG
 */
 .kiseppe-debug {
-    border: dashed 2px rgba(0, 255,0,0.5);
+    border: dotted 2px rgba(255,0,0,0.5);
+}
+
+/*
+  animation
+*/
+@keyframes zoomin_bl {
+    0% { font-size: 2em; color: transparent; bottom: 0.5em; }
+  100% { }
+}
+@keyframes zoomin {
+    0%   { font-size: 2em; color: transparent; }
+    100% { }
+}
+@keyframes araware {
+    0% { color: transparent; background-color: transparent; }
+  100% { }
 }
 
 /*
@@ -13,7 +29,6 @@
     height: 0px;
     border: 0;
     overflow: hidden;
-    border: dashed 2px rgba(255,0,255,0.7);
 }
 
 /*
@@ -25,13 +40,16 @@
     line-height: 1.2em;
     text-align: center;
     font-size: x-small;
-    background-color: brown;
+/*    background-color: darkgoldenrod;*/
+    background-color: rgba(165,42,42,0.9); /* brown */
     color: white;
 
-    border: dashed 2px rgba(255,0,255,0.7);
+    animation: araware 1.5s;
 }
 .kiseppe-series-sale-badge {
-    border: dashed 2px rgba(255,0,255,0.7);
+    animation-name: araware;
+    animation-duration: 0.7s;
+    animation-iteration-count: 3;
 }
 .kiseppe-pg-btn {
     position: absolute;
@@ -39,8 +57,10 @@
     left: 0;
     z-index: 100000;
     cursor: pointer;
+    font-size: 1em;
+    color: rgba(0,0,0,0.9);
 
-    border: dashed 2px rgba(255,0,255,0.7);
+    animation: zoomin_bl 1.5s;
 }
 
 /*
@@ -72,6 +92,4 @@ dialog#popup_modal::backdrop {
     border: 0;
     overflow: visible;
 }
-
-
 

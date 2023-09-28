@@ -1,3 +1,14 @@
+2023-09-28  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: iroiro
+
+2023-09-26  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	- new function extract_price_and_point()
+	- new function get_jsdr()
+	- new function generate_callback_ex => 指定ノードを exclude して observe
+
 2023-09-24  Tatsuwo  <yto at example.com>
 
 	* chrome/kiseppe.css: new!
