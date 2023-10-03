@@ -8,7 +8,7 @@
 /*
   animation
 */
-@keyframes zoomin_bl {
+@keyframes zoomin_bottom_left {
     0% { font-size: 2em; color: transparent; bottom: 0.5em; }
   100% { }
 }
@@ -40,7 +40,6 @@
     line-height: 1.2em;
     text-align: center;
     font-size: x-small;
-/*    background-color: darkgoldenrod;*/
     background-color: rgba(165,42,42,0.9); /* brown */
     color: white;
 
@@ -60,7 +59,7 @@
     font-size: 1em;
     color: rgba(0,0,0,0.9);
 
-    animation: zoomin_bl 1.5s;
+    animation: zoomin_bottom_left 1.5s;
 }
 
 /*
