@@ -3,6 +3,7 @@
 // Pages:
 // - Kindle ASIN Page
 //   - insert:[price-graph-iframe][series-jsdr]
+//   - observe
 // - Kindle Series Page
 //   - insert:[price-graph-button][item-jsdr][series-jsdr]
 //   - observe
@@ -99,7 +100,7 @@ async function main() {
         );
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
-        
+
     } else if (document.querySelector('div[id="browse-views-area"] div[class*="browse-clickable-item"]')) {
 
         console.log("kiseppe: here is Kindle Grid30 Page");
@@ -121,7 +122,7 @@ async function main() {
         const callback = generate_callback(e, kindle_horizontal_component);
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
-        
+
     } else if (document.querySelector('div[class*="result-section"]') &&
                document.querySelector('div[id=search-results]')) {
 
@@ -571,7 +572,7 @@ async function kindle_search_page() {
     const url = KS_JD_API + asins;
     const res = await access_api(url);
     if (!res || !res['result']) return;
-    
+
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
         const cntn = document.querySelector('div[data-asin="'+asin+'"]');
@@ -590,7 +591,7 @@ async function kindle_search_page() {
             if (b) change_background_color(b, 0);
         }
     });
-    
+
     return;
 }
 
@@ -610,9 +611,9 @@ async function kindle_horizontal_component() {
         ).forEach(e => {
             const cntn = e.closest('div[id^="grid-item_"]');
             if (cntn.querySelector('.kiseppe-pg-btn'))
-		return; // button already exists
+                return; // button already exists
             if (cntn.querySelector('img[alt="likes icon"]'))
-		return; // vvv  manga-store mateba-muryou's "likes" icon
+                return; // vvv  manga-store mateba-muryou's "likes" icon
             const asin = get_asin_in_href(e.closest('a'));
             const item_title = e.getAttribute('alt')
             const pinfo = extract_price_and_point(cntn);
@@ -641,17 +642,17 @@ async function kindle_horizontal_component() {
             let cntn = e.closest('div[class^="_manga-store-shoveler_style_item-row-"]'); // two rows
             if (! cntn) cntn = e.closest('li');
             if (cntn.querySelector('.kiseppe-pg-btn'))
-		return; // button already exists
+                return; // button already exists
             if (/banner-/.test(cntn.getAttribute("class")))
-		return; // manga-store big banner            
+                return; // manga-store big banner            
             if (cntn.querySelector('img[alt="likes icon"]'))
-		return; // manga-store mateba-muryou's "likes" icon
+                return; // manga-store mateba-muryou's "likes" icon
             if (cntn.querySelector('span[class*="collection-type"]'))
-		return; // manga-store collection ASIN
+                return; // manga-store collection ASIN
             if (cntn.querySelector('[class*="a-icon-prime"]'))
-		return; // ASIN page non-kindle-books
+                return; // ASIN page non-kindle-books
             if (cntn.querySelector('[data-endtime]'))
-		return; // with timer
+                return; // with timer
 
             const asin = get_asin_in_href(e.closest('a'));
             const item_title = e.getAttribute('alt')
@@ -659,7 +660,7 @@ async function kindle_horizontal_component() {
             put_price_graph_button(cntn, asin, item_title, pinfo);
         });
     });
-    
+
     return;
 };
 
