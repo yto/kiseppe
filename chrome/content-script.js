@@ -32,6 +32,8 @@
 //     - observe
 // - Kindle Store Page (others)
 //   - Kindle Horizontal Component
+// - Kindle Other Page (特別設定なし)
+//   - multiby https://www.amazon.co.jp/kindle-dbs/multibuy?basketId=Gz2UUPLE
 //
 // Components:
 // - Kindle Author Component
@@ -40,7 +42,7 @@
 //   - [price-graph-button][item-jsdr][series-jsdr]
 // - Kindle Grid12 Component
 //   - [price-graph-button][item-jsdr]
-// - Kindle Horizontal Component
+// - Kindle Carousel Component
 //   - General Carousel
 //     - [price-graph-button]
 //   - Manga Store Ranking Carousel
@@ -69,7 +71,8 @@ async function main() {
         observer.observe(e, config); // restart observation
     };
     const generate_callback_ex = (e, qs, f) => async function (mutations, observer) {
-        const exs = Array.from(e.querySelectorAll(qs));
+        //const exs = Array.from(e.querySelectorAll(qs));
+        const exs = [...e.querySelectorAll(qs)];
         let is_mutation_detected = 0;
         for (let mu of mutations) {
             if (exs.filter(x => x.contains(mu.target)).length)
@@ -226,7 +229,7 @@ async function kindle_asin_page() {
     // API access
     const url = `${KS_JD_API}COL_${srasin},${asin}`;
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    if (! res?.result) return;
 
     // display jsdr information
     const sr_jsdr = get_series_jsdr(srasin, res);
@@ -262,7 +265,8 @@ async function kindle_author_component() {
     // API access
     const url = KS_JD_API + alist.join(",");
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    //if (!res || !res['result']) return;
+    if (! res?.result) return;
 
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
@@ -305,7 +309,8 @@ async function kindle_grid30_page() {
     // API access
     const url = KS_JD_API + asins.flat().join(",");
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    //if (!res || !res['result']) return;
+    if (! res?.result) return;
 
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
@@ -356,7 +361,8 @@ async function kindle_octopus_component() {
     // API access
     const url = KS_JD_API + [aslist, calist].flat().join(",");
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    //if (!res || !res['result']) return;
+    if (! res?.result) return;
     
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
@@ -405,7 +411,7 @@ async function kindle_grid12_component() {
     // API access
     const url = KS_JD_API + asins;
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    if (! res?.result) return;
 
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
@@ -466,7 +472,7 @@ async function kindle_series_page() {
     // API access
     const url = `${KS_JD_API}COL_${srasin},${asins}`;
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    if (! res?.result) return;
 
     // display jsdr information
     const sr_jsdr = get_series_jsdr(srasin, res);
@@ -517,7 +523,7 @@ async function kindle_ranking_page() {
     // access to API
     const url = KS_JD_API + asins;
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    if (! res?.result) return;
 
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
@@ -571,7 +577,7 @@ async function kindle_search_page() {
     // API access
     const url = KS_JD_API + asins;
     const res = await access_api(url);
-    if (!res || !res['result']) return;
+    if (! res?.result) return;
 
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
@@ -596,7 +602,7 @@ async function kindle_search_page() {
 }
 
 
-//// Kindle Horizontal Component
+//// Kindle Carousel Component
 async function kindle_horizontal_component() {
 
     //// manga store ranking carousel
@@ -621,7 +627,7 @@ async function kindle_horizontal_component() {
         });
     }
 
-    //// horizontal - general carousel
+    //// general carousel
     // カテゴリTOP: div[class*="octopus-pc-card-content"]
     // ASIN page: %2Fdp%2FB00JGI56B0%2F
     // キンドルトップ横スクロール表示
@@ -667,28 +673,32 @@ async function kindle_horizontal_component() {
 
 //// Miscellaneous Small Functions
 function get_asin_in_href(e) {
-    if (! e || ! e.getAttribute('href')) return '';
-    const r = e.getAttribute('href').match(/(B[0-9A-Z]{9})/);
-    return r ? r[1] : '';
+    if (! e?.getAttribute('href')) return '';
+    const r = e.getAttribute('href').match(/B[0-9A-Z]{9}/);
+    console.log("ASIN:::", r);
+    return r ? r[0] : '';
 }
 function get_series_asin(e) {
-    const c = e.querySelector("a[href*='binding=kindle_edition']");
+    const c = e?.querySelector("a[href*='binding=kindle_edition']");
     const srasin = get_asin_in_href(c);
     return [srasin, c];
 }
 function get_series_jsdr(srasin, apires) {
-    if (!apires || !apires['result'] || !apires['result']['series']) return 0;
-    const as = apires['result']['series'];
-    if (!(srasin in as)) return 0;
+    //if (!apires || !apires['result'] || !apires['result']['series']) return 0;
+    //const as = apires['result']['series'];
+    const as = apires?.result?.series;
+    console.log("SeriesASIN:::", as);
+    if (!as || !(srasin in as)) return 0;
     return Number(as[srasin]);
 }
 function get_jsdr(asin, apires, pp={}) {
-    if (!apires || !apires['result'] || !apires['result']['books']) return 0;
-    const ar = apires['result']['books'];
-    if (!(asin in ar)) return 0;
+    //if (!apires || !apires['result'] || !apires['result']['books']) return 0;
+    //const ar = apires['result']['books'];
+    const ar = apires?.result?.books;
+    if (!ar || !(asin in ar)) return 0;
     if ((asin in pp) && ('price' in pp[asin]) && ('point' in pp[asin])) {
         let price = Number(pp[asin]['price']);
-        let point = pp[asin]['point'] ? Number(pp[asin]['point']) : 0;
+        let point = Number(pp[asin]['point']);
         if (price != Number(ar[asin]['latest_price']) ||
             point != Number(ar[asin]['latest_point'])) {
             const max_price = Number(ar[asin]['max_price']);
@@ -704,6 +714,7 @@ function extract_price_and_point(e) {
     let point;
     let r;
     const s = e.innerHTML;
+    //console.log("ext:", s);
     if (r = s.match(/￥\s*(([0-9]{1,3})(,[0-9]{3})*)/)) {
         price = r[1].replaceAll(',', '');
         console.log(r[0]);
@@ -739,7 +750,7 @@ function extract_price_and_point(e) {
     // <span class="a-size-large a-color-price"> ￥632 </span>
     // <span class="a-size-base-plus itemPoints"> 6pt </span>
 
-    // horizontal(author page):
+    // carousel(author page):
     //<span class="a-size-base a-color-price authorPageCarouselText"> ￥751 </span>
     //<span class="a-size-base a-color-price authorPageCarouselText"> 24pt (3%) </span>
 
@@ -751,7 +762,7 @@ function extract_price_and_point(e) {
     // <span class="a-price" data-a-size="m" data-a-color="price"><span class="a-offscreen">￥ 413</span><span aria-hidden="true"><span class="a-price-symbol"></span><span class="a-price-whole">￥ 413</span></span></span>
     // <span class="a-size-base-plus asin-loyalty-points-percentage">4ポイント(1%)</span>
 
-    // horizontal(octopus):
+    // carousel(octopus):
     // <div class="a-section octopus-pc-asin-price"><span class="a-price" data-a-size="l" data-a-color="base"><span class="a-offscreen">￥673</span><span aria-hidden="true"><span class="a-price-symbol">￥</span><span class="a-price-whole">673</span></span></span></div><span class="a-price" data-a-size="l" data-a-color="base"><span class="a-offscreen">￥704</span><span aria-hidden="true"><span class="a-price-symbol">￥</span><span class="a-price-whole">704</span></span></span></div>
     // <div class="a-section octopus-pc-asin-points"><span class="a-size-base a-color-base">7ポイント(1%)</span></div>
 
@@ -788,7 +799,7 @@ async function access_api(url) {
 
 // put a price graph button
 function put_price_graph_button(e, asin, title, pinfo={}) {
-    if (! title) return false;
+    if (!e || !title) return false;
     const pgd = build_price_graph_dialog(asin, title, pinfo);
     e.style.position = "relative";
     e.appendChild(pgd);
@@ -798,6 +809,7 @@ function put_price_graph_button(e, asin, title, pinfo={}) {
 // 実質割引率に合わせて背景色を変更
 // change background color according to jsdr
 function change_background_color(e, v, mode = "") { // 0 <= v <= 100
+    if (!e) return;
     const toumei = v / 100 * 0.2;
     const rgba = `rgba(255,0,0,${toumei})`;
     if (mode == 'g') e.style.background = `linear-gradient(${rgba}, 90%, white)`;
@@ -807,6 +819,7 @@ function change_background_color(e, v, mode = "") { // 0 <= v <= 100
 // 実質割引率バッジ
 // build and put a "real discount rate" budge
 function show_jsdr_badge(e, jsdr, xp, yp) {
+    if (!e) return false;
     const class_name = 'kiseppe-jsdr-badge';
     if (! e.querySelector(`.${class_name}`)) {
         const b = document.createElement('div');
@@ -825,6 +838,7 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
 // "シリーズにセール作品があるよ" バッジ
 // build and put a "this series has discounted items" budge
 function show_series_sale_badge(e) {
+    if (!e) return false;
     const class_name = 'kiseppe-series-sale-badge';
     if (! e.querySelector(`.${class_name}`)) {
         const b = document.createElement('span');
@@ -851,7 +865,7 @@ function build_price_graph_dialog(asin, title, pinfo={}) {
     const pgb = document.createElement('span');
     pgb.classList.add("kiseppe-pg-btn");
     pgb.title = `価格推移グラフを表示します[${pr}][${po}]`;
-    pgb.innerText = '📊';
+    pgb.innerText = '📈'; // '📊';
     
     // click => display a price graph <dialog>
     pgb.addEventListener('click', (event) => {
@@ -917,23 +931,11 @@ function asin_page_main() {
     if (! /^B[0-9A-Z]{9}$/.test(asin)) return;
     console.log(`kiseppe: ${asin}`);
 
-    //// get the price from this page
-    let _pr = document.getElementById('youPaySection');
-    let price = _pr ? _pr.getAttribute('data-kindle-price').replace(/\.0$/, '') : '';
-    // case: "期間限定無料(Free for a limited time)" or "kindle unlimited"
-    if (price == '') {
-        _pr = document.getElementById('kindle-price');
-        if (_pr) price = _pr.textContent.match(/([0-9,]+)/m)[1].replace(/,/g, '');
-    }
-
-    //// get the point back from this page
-    let _po = Array.from(document.getElementsByClassName('total-points-value-display-column')).map(x => x.textContent).join('').match(/\+([0-9,]+) /m);
-    let point = _po ? _po[1] : '';
-    // case: "期間限定無料(Free for a limited time)" or "kindle unlimited"
-    if (point == '') {
-        _po = document.getElementById('Ebooks-desktop-KINDLE_ALC-prices-loyaltyPoints');
-        if (_po) point = _po.textContent.match(/ ([0-9,]+)/m)[1].replace(/,/g, '');
-    }
+    //// get the price and the point back from this page
+    const pinfo = extract_price_and_point(document.querySelector('#MediaMatrix'));
+    const price = pinfo.price ?? '';
+    const point = (pinfo.price == 0) ? '' : (pinfo.point ?? '');
+    console.log(pinfo, [price, point]);
 
     //// build API url (returns a web page for iframe)
     // To put the today's point on the graph, API needs price and point.

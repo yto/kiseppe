@@ -1,3 +1,7 @@
+2023-10-09  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: 連休作業の反映
+
 2023-10-03  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js: iroiro
