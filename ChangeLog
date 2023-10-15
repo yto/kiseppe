@@ -1,3 +1,18 @@
+2023-10-15  Tatsuwo  <yto at example.com>
+
+	* chrome/debug-message.css: new.  -
+
+	* chrome/debug-message.js: new.  簡易デバグメッセージ表示。
+	デベロッパーツールを立ち上げる前のチェック用途。
+
+	* chrome/content-script.js:
+	- ASIN page にもセール価格時にバッヂ表示・背景色変更
+	- その他いろいろ
+
+2023-10-11  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: iroiro
+
 2023-10-09  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js: 連休作業の反映

@@ -9,14 +9,19 @@
         "48": "icon-48.png",
         "128": "icon-128.png"
     },
-
     "content_scripts": [
 	{
 	    "matches": [
 		"https://www.amazon.co.jp/*"
 	    ],
-	    "js": ["content-script.js"],
-	    "css": ["kiseppe.css"]
+	    "js": [
+		"debug-message.js",
+		"content-script.js"
+	    ],
+	    "css": [
+		"debug-message.css",
+		"kiseppe.css"
+	    ]
 	}
     ]
 }
