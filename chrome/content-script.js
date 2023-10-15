@@ -331,7 +331,7 @@ async function kindle_grid30_page() {
         a2pinfo[asin] = pinfo;
         put_price_graph_button(e, asin, item_title, pinfo);
     });
-    console.log("aset:", aset.size, aset);
+    //console.log("aset:", aset.size, aset);
     const asins = Array.from(aset);
     if (asins.length <= 0) return;
     
@@ -345,7 +345,7 @@ async function kindle_grid30_page() {
         const e = document.querySelector(
             `${qs_grid30} a[href^="/gp/product/${asin}"][aria-label]`
         );
-        console.log(asin, e);
+        //console.log(asin, e);
         const cntn = e.closest('div[class*="browse-clickable-item"]');
         const jsdr = get_jsdr(asin, res, a2pinfo);
         if (jsdr >= JSDR_CUTOFF) {
@@ -362,8 +362,6 @@ async function kindle_grid30_page() {
 // Ex. https://www.amazon.co.jp/b?node=22083216051
 async function kindle_octopus_component() {
     let e = document.querySelector('[data-card-metrics-id*="octopus-search-result-card_"');
-
-    console.log('octopus');
 
     // get all ASINs
     const a2pinfo = {};
@@ -394,7 +392,7 @@ async function kindle_octopus_component() {
     Object.keys(res['result']['books']).forEach(asin => {
         const e = document.querySelector(`h2 a[href*="/dp/${asin}"]`);
         if (! e) return;
-        console.log('kiseppe: octopus-component', asin);
+        //console.log('kiseppe: octopus-component', asin);
         const cntn = e.closest('div[class*="s-card-container"]');
         const [srasin, seri] = get_series_asin(cntn);
         const sr_jsdr = get_series_jsdr(srasin, res);
@@ -429,7 +427,7 @@ async function kindle_grid12_component() {
         a2pinfo[asin] = pinfo;
         put_price_graph_button(c, asin, item_title, pinfo);
     });
-    console.log("aset:", aset.size, aset);
+    //console.log("aset:", aset.size, aset);
     const asins = Array.from(aset);
     if (asins.length <= 0) return;
 
@@ -443,7 +441,7 @@ async function kindle_grid12_component() {
         if (e = document.querySelector(
             `div[class*="asin-container"] a[href*="/dp/${asin}"]`
         )) {
-            console.log('kiseppe: Grid12', asin);
+            //console.log('kiseppe: Grid12', asin);
             const c = e.closest('div[class*="asin-container"]');
             const jsdr = get_jsdr(asin, res, a2pinfo);
             if (jsdr >= JSDR_CUTOFF) {
@@ -468,7 +466,7 @@ async function kindle_series_page() {
         srasin = e?.dataset?.collectionAsin;
     }
     if (! srasin) return;
-    ksdebug.log(`series asin: ${srasin}`);
+    ksdebug.log('series asin:', srasin);
 
     // get ASINs
     const a2pinfo = {};
@@ -490,7 +488,7 @@ async function kindle_series_page() {
         a2pinfo[asin] = pinfo;
         put_price_graph_button(e, asin, item_title, pinfo);
     });
-    console.log(aset);
+    //console.log(aset);
     const asins = Array.from(aset);
 
     // API access
@@ -696,7 +694,7 @@ async function kindle_carousel_component() {
 function get_asin_in_href(e) {
     if (! e?.getAttribute('href')) return '';
     const r = e.getAttribute('href').match(/B[0-9A-Z]{9}/);
-    console.log("ASIN:::", r);
+    //console.log("ASIN:::", r);
     return r ? r[0] : '';
 }
 
@@ -708,7 +706,7 @@ function get_series_asin(e) {
 
 function get_series_jsdr(srasin, apires) {
     const as = apires?.result?.series;
-    console.log("SeriesASIN:::", as);
+    //console.log("SeriesASIN:::", as);
     if (!as || !(srasin in as)) return 0;
     return Number(as[srasin]);
 }
@@ -745,21 +743,21 @@ function extract_price_and_point(e) {
     //console.log("ext:", s);
     if (r = s.match(/￥\s*(([0-9]{1,3})(,[0-9]{3})*)/)) {
         price = r[1].replaceAll(',', '');
-        console.log(r[0]);
+        //console.log(r[0]);
     }
     if (e.querySelector('.a-icon-kindle-unlimited')) { // または、￥1,000で購入
         if (r = s.match(/または、￥(([0-9]{1,3})(,[0-9]{3})*)で購入/)) {
             price = r[1].replaceAll(',', '');
-            console.log(r[0]);
+            //console.log(r[0]);
         }
     }
     if (r = s.match(/([0-9]+)(ポイント|pt)/)) {
         point = r[1];
-        console.log(r[0]);
+        //console.log(r[0]);
     }
     if (! price && point) point = void 0;
 
-    console.log([price, point]);
+    //console.log([price, point]);
     return {'price': price, 'point': point};
 
     // ranking:
@@ -930,7 +928,7 @@ function build_price_graph_dialog(asin, title, pinfo={}) {
 
 // Insert a Price Graph iframe in an ASIN page (based on kiseppe 1.0's main())
 function insert_price_graph(asin, pinfo) {
-    ksdebug.log(`kiseppe: insert price graph ${asin}`);
+    ksdebug.log('kiseppe: insert price graph', asin);
 
     if (document.getElementById('kiseppe')) return false;
 

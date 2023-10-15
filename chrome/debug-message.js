@@ -58,6 +58,6 @@ class DebugMessage {
             (typeof(x)).match(/string|number|boolean/) ? x : '{...}'
         ).join(' ');
         c.innerHTML = `[${hms}] ${line}<br>${c.innerHTML}`;
-        console.log(s);
+	console.log(...s);
     }
 }
