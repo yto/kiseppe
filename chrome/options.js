@@ -24,9 +24,9 @@ document.getElementById('close_button').addEventListener('click', () =>
     window.close());
 document.getElementById('initialize_button').addEventListener('click', () =>
     document.querySelectorAll('#option-setting input').forEach(e => {
-	if (e.id == 'opt_bgcolor_hex') e.value = '#FF0000';
+        if (e.id == 'opt_bgcolor_hex') e.value = '#FF0000';
         else if (e.type == 'checkbox') e.checked = false;
-	else e.value = '';
+        else e.value = '';
     })
 );
 
@@ -35,15 +35,15 @@ document.getElementById('initialize_button').addEventListener('click', () =>
 function save_options() {
     document.querySelectorAll('#option-setting input').forEach(e => {
         const value = (e.type == 'checkbox') ? (e.checked ? 1 : 0) : e.value;
-	localStorage.setItem(e.id, value);
+        localStorage.setItem(e.id, value);
     });
     //window.close();
 }
 function load_options() {
     Object.keys(localStorage).forEach(name => {
         const e = document.getElementById(name);
-	const v = localStorage.getItem(name);
-	console.log(name, v, e);
+        const v = localStorage.getItem(name);
+        console.log(name, v, e);
         if (!e) return;
         if (e.type == 'checkbox') e.checked = (v == 1);
         else e.value = v ?? '';

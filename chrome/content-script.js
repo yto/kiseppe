@@ -98,14 +98,14 @@ async function main() {
 
         ksdebug.log("kiseppe: here is Kindle ASIN Page");
         kindle_asin_page();
-	if (storage_items?.opt_asin_page_only) return;
-	if (storage_items?.opt_ignore_carousel) return;
+        if (storage_items?.opt_asin_page_only) return;
+        if (storage_items?.opt_ignore_carousel) return;
 
-	await kindle_carousel_component();
-	ksdebug.log("wait a few seconds");
-	await sleep(1500);
-	ksdebug.log("ok, go!");
-	
+        await kindle_carousel_component();
+        ksdebug.log("wait a few seconds");
+        await sleep(1500);
+        ksdebug.log("ok, go!");
+        
         // - ignore carousel components without kindle books
         //   - observe only [id=dp-container]
         const e = document.querySelector('[id=dp-container]');
@@ -121,7 +121,7 @@ async function main() {
         observer.observe(e, config);
 
     } else if (storage_items?.opt_asin_page_only) {
-	return
+        return
     } else if (document.querySelector(
         'div[id="browse-views-area"] div[class*="browse-clickable-item"]'
     )) {
@@ -135,7 +135,7 @@ async function main() {
 
         ksdebug.log("kiseppe: here is Kindle Octpus Page");
         kindle_octopus_component();
-	if (storage_items?.opt_ignore_carousel) return;
+        if (storage_items?.opt_ignore_carousel) return;
         kindle_carousel_component();
 
     } else if (document.querySelector('title') &&
@@ -143,7 +143,7 @@ async function main() {
 
         ksdebug.log("kiseppe: here is Kindle Author Page");
         kindle_author_component();
-	if (storage_items?.opt_ignore_carousel) return;
+        if (storage_items?.opt_ignore_carousel) return;
         await kindle_carousel_component();
 
         const e = document.querySelector('#authorPageBooks');
@@ -162,7 +162,7 @@ async function main() {
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
 
-	if (storage_items?.opt_ignore_carousel) return;
+        if (storage_items?.opt_ignore_carousel) return;
         kindle_carousel_component();
 
     } else if (document.querySelector(
@@ -203,7 +203,7 @@ async function main() {
     } else if (/manga-store/.test(location.href)) {
 
         ksdebug.log("kiseppe: here is Kindle Manga Store Page");
-	if (storage_items?.opt_ignore_carousel) return;
+        if (storage_items?.opt_ignore_carousel) return;
         await kindle_carousel_component();
 
         const e = document.querySelector('.msw-page');
@@ -220,7 +220,7 @@ async function main() {
     )) {
 
         ksdebug.log("kiseppe: here is Kindle Store Page (Others)");
-	if (storage_items?.opt_ignore_carousel) return;
+        if (storage_items?.opt_ignore_carousel) return;
         kindle_carousel_component();
 
     } else {
@@ -679,7 +679,7 @@ async function kindle_carousel_component() {
                             'li a[href*="%2Fdp%2FB"] img[alt]'
         ).forEach(e => {
             if (e.querySelector('.kiseppe-pg-btn'))
-		return; // button already exists
+                return; // button already exists
             if (/image-ku/.test(e.getAttribute('src'))) return;
             let cntn = e.closest('div[class^="_manga-store-shoveler_style_item-row-"]'); // two rows
             if (! cntn) cntn = e.closest('li');
@@ -877,12 +877,12 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
         b.style.top = yp;
         b.style.right = xp;
         b.innerHTML = `実質<br><b>${jsdr}%</b></br>オフ`;
-	const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
-	const rgb = hex2rgb(color_hex).map(v => Math.round(v/1.5)).join(',');
-	b.style.backgroundColor = `rgba(${rgb})`;
+        const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
+        const rgb = hex2rgb(color_hex).map(v => Math.round(v/1.5)).join(',');
+        b.style.backgroundColor = `rgba(${rgb})`;
         e.style.position = "relative";
         e.appendChild(b);
-	return true;
+        return true;
     } else {
         return false;
     }
@@ -989,12 +989,12 @@ let storage_items = {};
 let ksdebug; // for DEBUG MESSAGE
 async function read_storage_items() {
     const get_storage = () =>
-	  new Promise(resolve => chrome.storage.local.get(null, resolve));
+          new Promise(resolve => chrome.storage.local.get(null, resolve));
     return await get_storage();
 };
 //const storage_items =
 //      Object.keys(localStorage).map(name => {
-//	  return {[name]: localStorage.getItem(name) ?? ''};
+//        return {[name]: localStorage.getItem(name) ?? ''};
 //      });
 //console.log(storage_items);
 
