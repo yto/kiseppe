@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>Options</title>
+    <style>
+      h1 { margin: 5px; }
+      #option-setting > div { margin: 1rem 5px; }
+      button { display: block; margin: 0.5rem 5px; text-align: left; }
+    </style>
+  </head>
+  <body>
+    <h1>Options - Kiseppe ver.2</h1>
+    <div id="option-setting">
+      <div>
+        <label>
+          <input type="checkbox" id="opt_asin_page_only">
+          価格推移グラフの表示のみ（version 1.0 相当）
+        </label>
+      </div>
+      <div>
+        <label>
+          <input type="checkbox" id="opt_ignore_carousel">
+          カルーセルへの処理を行わない
+        </label>
+      </div>
+      <div>
+        <label>
+          <input type="checkbox" id="opt_no_api_access">
+          kiseppe API にアクセスしない (割引情報非表示)
+        </label>
+      </div>
+      <div>
+        <label>
+          <input type="checkbox" id="opt_debug_message">
+          メッセージ出力ボックスを表示する
+        </label>
+      </div>
+      <div>
+        <label>
+          <input type="color" id="opt_bgcolor_hex">
+	  セール作品の背景色 (デフォルトは #FF0000)
+        </label>
+      </div>
+      <div>
+        <button id="save_button">保存して閉じる<br>Save and close</button>
+        <button style="display: none" id="load_button">保存された設定を再読込<br>Load saved settings</button>
+        <button id="close_button">保存せずに閉じる<br>Close without saving</button>
+        <button id="initialize_button">初期設定に戻す（要保存）<br>Restore default settings (requires saving)</button>
+      </div>
+    </div>
+    <script src="options.js"></script>
+  </body>
+</html>

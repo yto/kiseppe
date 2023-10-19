@@ -30,10 +30,12 @@
 // - Kindle Manga Store Page
 //   - Kindle Carousel Component
 //     - observe
-// - Kindle Store Page (others)
+// - Kindle Page (others)
 //   - Kindle Carousel Component
-// - Kindle Other Page (特別設定なし)
+// - Kindle Page (特別設定なし)
 //   - multiby https://www.amazon.co.jp/kindle-dbs/multibuy?basketId=Gz2UUPLE
+//   - stores page https://www.amazon.co.jp/stores/page/EF53E35F-2FAF-49AC-B191-257E764F2703
+//
 //
 // Components:
 // - Kindle Author Component
@@ -56,14 +58,14 @@ const KS_IF_API = 'https://www.listasin.net/api/0199/chex/'; // iframe
 const KS_JD_API = 'https://www.listasin.net/api/0199_jd.cgi?asins='; // json
 const JSDR_CUTOFF = 15;
 
-
+////////////////////////////////////////////////////////////////
 // Determine page type and assign processing
 // ページの種類を判定して処理を割り当てる
 // Use an observer for pages with dynamically changing content
 // 動的に内容が変化するページには observer を使う
 async function main() {
-
-    const sleep = ms => new Promise(res => setTimeout(res, ms));
+    storage_items = await read_storage_items();
+    ksdebug = new DebugMessage(storage_items?.opt_debug_message == true);
 
     const config = { childList: true, subtree: true };
     const generate_callback = (e, f) => async function (mutations, observer) {
@@ -96,8 +98,10 @@ async function main() {
 
         ksdebug.log("kiseppe: here is Kindle ASIN Page");
         kindle_asin_page();
+	if (storage_items?.opt_asin_page_only) return;
+	if (storage_items?.opt_ignore_carousel) return;
 
-        await kindle_carousel_component();
+	await kindle_carousel_component();
 	ksdebug.log("wait a few seconds");
 	await sleep(1500);
 	ksdebug.log("ok, go!");
@@ -116,6 +120,8 @@ async function main() {
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
 
+    } else if (storage_items?.opt_asin_page_only) {
+	return
     } else if (document.querySelector(
         'div[id="browse-views-area"] div[class*="browse-clickable-item"]'
     )) {
@@ -128,15 +134,17 @@ async function main() {
     )) {
 
         ksdebug.log("kiseppe: here is Kindle Octpus Page");
-        kindle_carousel_component();
         kindle_octopus_component();
+	if (storage_items?.opt_ignore_carousel) return;
+        kindle_carousel_component();
 
     } else if (document.querySelector('title') &&
                /一覧.+著者/.test(document.querySelector('title').textContent)) {
 
         ksdebug.log("kiseppe: here is Kindle Author Page");
-        await kindle_carousel_component();
         kindle_author_component();
+	if (storage_items?.opt_ignore_carousel) return;
+        await kindle_carousel_component();
 
         const e = document.querySelector('#authorPageBooks');
         const callback = generate_callback(e, kindle_carousel_component);
@@ -147,13 +155,15 @@ async function main() {
                document.querySelector('div[id=search-results]')) {
 
         ksdebug.log("kiseppe: here is Grid12 Page");
-        kindle_carousel_component();
         await kindle_grid12_component();
 
         const e = document.querySelector('div[id=search-results]').parentNode;
         const callback = generate_callback(e, kindle_grid12_component);
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
+
+	if (storage_items?.opt_ignore_carousel) return;
+        kindle_carousel_component();
 
     } else if (document.querySelector(
         '[data-entity-id][data-type=collection], [data-collection-asin]'
@@ -193,13 +203,13 @@ async function main() {
     } else if (/manga-store/.test(location.href)) {
 
         ksdebug.log("kiseppe: here is Kindle Manga Store Page");
-        kindle_carousel_component();
+	if (storage_items?.opt_ignore_carousel) return;
+        await kindle_carousel_component();
 
         const e = document.querySelector('.msw-page');
         const callback = generate_callback_ex(
             e,
             'div[data-csa-c-painter="banner-carousel-cards"]',
-            //kindle_ranking_page
             kindle_carousel_component
         );
         const observer = new MutationObserver(callback);
@@ -210,6 +220,7 @@ async function main() {
     )) {
 
         ksdebug.log("kiseppe: here is Kindle Store Page (Others)");
+	if (storage_items?.opt_ignore_carousel) return;
         kindle_carousel_component();
 
     } else {
@@ -242,6 +253,7 @@ async function kindle_asin_page() {
 
     // call kiseppe 1.0 (kiseppe1.0::main() => insert_price_graph())
     insert_price_graph(asin, pinfo);
+    if (storage_items?.opt_asin_page_only) return;
 
     // get series ASIN
     const [srasin, c] = get_series_asin(document.body);
@@ -562,10 +574,8 @@ async function kindle_ranking_page() {
 // Ex. https://www.amazon.co.jp/s?rh=n%3A2410280051&fs=true
 async function kindle_search_page() {
 
-    const asinatsu_sleep = ms => new Promise(res => setTimeout(res, ms));
-
     ksdebug.log("wait a few seconds");
-    await asinatsu_sleep(1600);
+    await sleep(1600);
     ksdebug.log("ok, go!");
 
     // collect ASINs for API access and put price graph buttons
@@ -606,7 +616,8 @@ async function kindle_search_page() {
 
         const jsdr = get_jsdr(asin, res, a2pinfo);
         if (jsdr >= JSDR_CUTOFF) {
-            const x = cntn.querySelector('img').closest('.sg-col-inner');
+            //const x = cntn.querySelector('img').closest('.sg-col-inner');
+            const x = cntn.querySelector('img').closest('.puisg-col-inner');
             show_jsdr_badge(x, jsdr, "4px", "0");
             const c = cntn.querySelector('div[cel_widget_id]');
             change_background_color(c, jsdr);
@@ -690,6 +701,8 @@ async function kindle_carousel_component() {
 
 ////////////////////////////////////////////////////////////////
 //// Miscellaneous Small Functions
+
+const sleep = ms => new Promise(res => setTimeout(res, ms));
 
 function get_asin_in_href(e) {
     if (! e?.getAttribute('href')) return '';
@@ -814,6 +827,7 @@ function extract_price_and_point(e) {
 
 async function access_api(url) {
     ksdebug.log('API URL: ' + url);
+    if (storage_items?.opt_no_api_access) return {};
     let res = {};
     try {
         res = await fetch(url).then(r => r.json())
@@ -841,9 +855,15 @@ function put_price_graph_button(e, asin, title, pinfo={}) {
 function change_background_color(e, v, mode = "") { // 0 <= v <= 100
     if (!e) return;
     const toumei = v / 100 * 0.2;
-    const rgba = `rgba(255,0,0,${toumei})`;
-    if (mode == 'g') e.style.background = `linear-gradient(${rgba}, 90%, white)`;
+    const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
+    const rgb = hex2rgb(color_hex).join(',');
+    const rgba = `rgba(${rgb},${toumei})`;
+    if (mode == 'g') e.style.background = `linear-gradient(${rgba}, 90%, rgba(${rgb},0)`;
     else e.style.backgroundColor = rgba;
+}
+const hex2rgb = (hex) => {
+    const i = parseInt(hex.slice(1), 16);
+    return [(i >> 16) & 255, (i >> 8) & 255, i & 255]
 }
 
 // build and put a "real discount rate" badge
@@ -857,9 +877,12 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
         b.style.top = yp;
         b.style.right = xp;
         b.innerHTML = `実質<br><b>${jsdr}%</b></br>オフ`;
+	const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
+	const rgb = hex2rgb(color_hex).map(v => Math.round(v/1.5)).join(',');
+	b.style.backgroundColor = `rgba(${rgb})`;
         e.style.position = "relative";
         e.appendChild(b);
-        return true;
+	return true;
     } else {
         return false;
     }
@@ -890,7 +913,7 @@ function build_price_graph_dialog(asin, title, pinfo={}) {
     // button to display a price graph <dialog>
     const pgb = document.createElement('span');
     pgb.classList.add("kiseppe-pg-btn");
-    pgb.title = `価格推移グラフを表示します[${pr}][${po}]`;
+    pgb.title = `価格推移グラフを表示します (price:${pr}, point:${po})`;
     pgb.innerText = '📈';
     
     // click => display a price graph <dialog>
@@ -961,7 +984,22 @@ function insert_price_graph(asin, pinfo) {
 
 
 ////////////////////////////////////////////////////////////////
+//// options
+let storage_items = {};
+let ksdebug; // for DEBUG MESSAGE
+async function read_storage_items() {
+    const get_storage = () =>
+	  new Promise(resolve => chrome.storage.local.get(null, resolve));
+    return await get_storage();
+};
+//const storage_items =
+//      Object.keys(localStorage).map(name => {
+//	  return {[name]: localStorage.getItem(name) ?? ''};
+//      });
+//console.log(storage_items);
+
+
+////////////////////////////////////////////////////////////////
 //// main
-const ksdebug = new DebugMessage(); // for DEBUG
 main();
 

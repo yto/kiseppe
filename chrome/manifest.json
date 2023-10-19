@@ -9,19 +9,26 @@
         "48": "icon-48.png",
         "128": "icon-128.png"
     },
+    "permissions": [
+        "storage"
+    ],
     "content_scripts": [
-	{
-	    "matches": [
-		"https://www.amazon.co.jp/*"
-	    ],
-	    "js": [
-		"debug-message.js",
-		"content-script.js"
-	    ],
-	    "css": [
-		"debug-message.css",
-		"kiseppe.css"
-	    ]
-	}
-    ]
+        {
+            "matches": [
+                "https://www.amazon.co.jp/*"
+            ],
+            "js": [
+                "debug-message.js",
+                "content-script.js"
+            ],
+            "css": [
+                "debug-message.css",
+                "kiseppe.css"
+            ]
+        }
+    ],
+    "options_ui": {
+        "page": "options.html",
+        "open_in_tab": true
+    }
 }
