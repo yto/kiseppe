@@ -1,11 +1,24 @@
+2023-10-20  Tatsuwo  <yto at example.com>
+
+	* chrome/manifest.json: options を popup でも使うようにした
+
+	* chrome/content-script.js: Kindle Unlimited が0円価格と認識されてしまい
+	実質100%オフと表示されるバグ。
+	これまでの KU 判定: e.querySelector('.a-icon-kindle-unlimited')
+	修正1: '.a-icon-kindle-unlimited, .apex-kindle-unlimited-badge'
+	修正2: '[class*=kindle-unlimited]'
+
 2023-10-19  Tatsuwo  <yto at example.com>
+
+	* release: v2.0.0-alpha.2
+	Release v2.0.0-alpha.2リリース · yto/kiseppe
+	https://github.com/yto/kiseppe/releases/tag/v.2.0.0-alpha.2
 
 	* firefox: chrome/ のソースをコピーしてテスト。
 	セール作品の背景グラデーションが意図通りでなかったので、
 	どちらでも同じになるように修正。
 	OLD: linear-gradient(${rgba}, 90%, white)
 	NEW: linear-gradient(${rgba}, 90%, rgba(${rgb},0)
-
 
 2023-10-18  Tatsuwo  <yto at example.com>
 

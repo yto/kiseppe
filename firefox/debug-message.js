@@ -51,6 +51,7 @@ class DebugMessage {
     };
 
     log(...s) {
+        console.log(...s);
         if (!this.active) return;
         const c = this.disp_msg;
         const [hms] = Date().match(/(([0-9]{2}:){2}[0-9]{2})/);
@@ -58,6 +59,5 @@ class DebugMessage {
             (typeof(x)).match(/string|number|boolean/) ? x : '{...}'
         ).join(' ');
         c.innerHTML = `[${hms}] ${line}<br>${c.innerHTML}`;
-        console.log(...s);
     }
 }

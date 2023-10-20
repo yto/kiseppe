@@ -4,50 +4,71 @@
     <meta charset="utf-8">
     <title>Options</title>
     <style>
-      h1 { margin: 5px; }
-      #option-setting > div { margin: 1rem 5px; }
-      button { display: block; margin: 0.5rem 5px; text-align: left; }
+      body { padding: 0; margin: 0; font-size: 0.9rem; }
+      #option-setting { width: 500px; }
+      h1, h2, label, button, #cr { display: block; margin: 1rem 0.9rem; }
+      #cr { text-align: right; }
+      hr { border: none; border-top: dashed 1px #808080; width 100%; }
+      @media (max-width: 550px) { #debug-setting { display: none; } }
+      .ch-only { display: none; }
+      _:lang(x)::-internal-media-controls-overlay-cast-button, .ch-only { display: inline }
+      .ff-only { display: none; }
+      _:lang(x)::-moz-placeholder, .ff-only { display: inline }
     </style>
   </head>
   <body>
-    <h1>Options - Kiseppe ver.2</h1>
+    <h1>Options</h1>
+    <hr>
     <div id="option-setting">
-      <div>
+      <label>
+        <input type="checkbox" id="opt_asin_page_only">
+        価格推移グラフの表示のみ（version 1.0 相当）
+      </label>
+      <label>
+        <input type="number" id="opt_jsdr_cutoff" min="1" max="100" value="15" size="4">
+        セールとみなすための実質割引率の下限
+      </label>
+      <label>
+        <input type="color" list="color-list" id="opt_bgcolor_hex" value="#FF0000">
+        セール作品の背景色<span class="ff-only"> (Firefox は popup では未対応)</span>
+        <datalist id="color-list">
+          <option value="#FF0000"></option>
+          <option value="#00FF00"></option>
+          <option value="#0000FF"></option>
+          <option value="#FFFF00"></option>
+          <option value="#00FFFF"></option>
+          <option value="#FF00FF"></option>
+          <option value="#000000"></option>
+        </datalist>
+      </label>
+      <button id="init_button">初期設定に戻す</button>
+      <span id="debug-setting">
+        <h2>DEBUG 用</h2>
         <label>
-          <input type="checkbox" id="opt_asin_page_only">
-          価格推移グラフの表示のみ（version 1.0 相当）
+          <input type="checkbox" id="opt_no_api_access">
+          Kiseppe API (JSON) にアクセスしない
         </label>
-      </div>
-      <div>
+        <label>
+          <input type="checkbox" id="opt_use_debug_api">
+          Kiseppe API (JSON) の代わりに DEBUG API にアクセスする
+        </label>
         <label>
           <input type="checkbox" id="opt_ignore_carousel">
           カルーセルへの処理を行わない
         </label>
-      </div>
-      <div>
-        <label>
-          <input type="checkbox" id="opt_no_api_access">
-          kiseppe API にアクセスしない (割引情報非表示)
-        </label>
-      </div>
-      <div>
         <label>
           <input type="checkbox" id="opt_debug_message">
           メッセージ出力ボックスを表示する
         </label>
-      </div>
-      <div>
-        <label>
-          <input type="color" id="opt_bgcolor_hex">
-          セール作品の背景色 (デフォルトは #FF0000)
-        </label>
-      </div>
-      <div>
-        <button id="save_button">保存して閉じる<br>Save and close</button>
-        <button style="display: none" id="load_button">保存された設定を再読込<br>Load saved settings</button>
-        <button id="close_button">保存せずに閉じる<br>Close without saving</button>
-        <button id="initialize_button">初期設定に戻す（要保存）<br>Restore default settings (requires saving)</button>
-      </div>
+        <button id="show_button">Show storage (console)</button>
+        <button id="clear_button">Clear storage</button>
+        <button id="close_button">閉じる</button>
+      </span>
+    </div>
+    <hr>
+    <div id="cr">
+      <a target="_blank" href="https://yapi.ta2o.net/kndlsl/kiseppe/">キセッペ (Kiseppe)</a>
+      powered by <a target="_blank" href="https://yapi.ta2o.net/kndlsl/">キンセリ</a>
     </div>
     <script src="options.js"></script>
   </body>

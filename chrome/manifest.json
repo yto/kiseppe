@@ -12,6 +12,9 @@
     "permissions": [
         "storage"
     ],
+    "action": {
+        "default_popup": "options.html"
+    },
     "content_scripts": [
         {
             "matches": [

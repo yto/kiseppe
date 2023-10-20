@@ -55,8 +55,12 @@
 // - JSDR means real discount rate (実質割引率)
 
 const KS_IF_API = 'https://www.listasin.net/api/0199/chex/'; // iframe
-const KS_JD_API = 'https://www.listasin.net/api/0199_jd.cgi?asins='; // json
-const JSDR_CUTOFF = 15;
+let KS_JD_API = 'https://www.listasin.net/api/0199_jd.cgi?asins='; // json
+const DEBUG_API = 'https://www.listasin.net/api/debug-logging.cgi?asins=';
+let JSDR_CUTOFF = 15;
+let storage_items = {};
+let ksdebug; // for DEBUG MESSAGE
+
 
 ////////////////////////////////////////////////////////////////
 // Determine page type and assign processing
@@ -64,9 +68,22 @@ const JSDR_CUTOFF = 15;
 // Use an observer for pages with dynamically changing content
 // 動的に内容が変化するページには observer を使う
 async function main() {
-    storage_items = await read_storage_items();
-    ksdebug = new DebugMessage(storage_items?.opt_debug_message == true);
 
+    // options
+    async function read_storage_items() {
+        const get_storage = () =>
+              new Promise(resolve => chrome.storage.local.get(null, resolve));
+        return await get_storage();
+    };
+    storage_items = await read_storage_items();
+    console.log("options", storage_items)
+    ksdebug = new DebugMessage(storage_items?.opt_debug_message == true);
+    if (storage_items?.opt_use_debug_api == true)
+        KS_JD_API = DEBUG_API;
+    if (storage_items?.opt_jsdr_cutoff)
+        JSDR_CUTOFF = Number(storage_items.opt_jsdr_cutoff);
+
+    // callback function for ovserver
     const config = { childList: true, subtree: true };
     const generate_callback = (e, f) => async function (mutations, observer) {
         observer.disconnect(); // stop observation
@@ -109,6 +126,7 @@ async function main() {
         // - ignore carousel components without kindle books
         //   - observe only [id=dp-container]
         const e = document.querySelector('[id=dp-container]');
+	console.assert(e);
         // - ignore countdown timer
         //   - [id*="Timer"] : 期間限定キャンペーン(right price box)
         //   - [data-endtimeseconds], [class*="timer"] : 特別オファー
@@ -147,6 +165,7 @@ async function main() {
         await kindle_carousel_component();
 
         const e = document.querySelector('#authorPageBooks');
+	console.assert(e);
         const callback = generate_callback(e, kindle_carousel_component);
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
@@ -158,6 +177,7 @@ async function main() {
         await kindle_grid12_component();
 
         const e = document.querySelector('div[id=search-results]').parentNode;
+	console.assert(e);
         const callback = generate_callback(e, kindle_grid12_component);
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
@@ -173,6 +193,7 @@ async function main() {
         await kindle_series_page();
 
         const e = document.querySelector('div[id=series-childAsin-widget]');
+	console.assert(e);
         const callback =
               generate_callback_ex(e, '#countdown_timer', kindle_series_page);
         // #countdown_timer : 終了までXXXXX秒
@@ -186,6 +207,7 @@ async function main() {
         await kindle_search_page();
         
         const e = document.querySelector('div#search');
+	console.assert(e);
         const callback = generate_callback(e, kindle_search_page);
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
@@ -196,6 +218,7 @@ async function main() {
         await kindle_ranking_page();
 
         const e = document.querySelector('div.p13n-desktop-grid');
+	console.assert(e);
         const callback = generate_callback(e, kindle_ranking_page);
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
@@ -207,6 +230,7 @@ async function main() {
         await kindle_carousel_component();
 
         const e = document.querySelector('.msw-page');
+	console.assert(e);
         const callback = generate_callback_ex(
             e,
             'div[data-csa-c-painter="banner-carousel-cards"]',
@@ -260,7 +284,6 @@ async function kindle_asin_page() {
     //if (! srasin) return;
 
     // API access
-    //const url = srasin ? `${KS_JD_API}COL_${srasin},${asin}` : `${KS_JD_API}${asin}`;
     const url = KS_JD_API + (srasin ? `COL_${srasin},` : '') + asin;
     const res = await access_api(url);
     if (! res?.result) return;
@@ -609,7 +632,7 @@ async function kindle_search_page() {
 
     // display jsdr information
     Object.keys(res['result']['books']).forEach(asin => {
-        const cntn = document.querySelector('div[data-asin="'+asin+'"]');
+        const cntn = document.querySelector(`div[data-asin="${asin}"]`);
         const [srasin, seri] = get_series_asin(cntn);
         const sr_jsdr = get_series_jsdr(srasin, res);
         if (sr_jsdr >= JSDR_CUTOFF) show_series_sale_badge(seri);
@@ -752,25 +775,28 @@ function extract_price_and_point(e) {
     let price;
     let point;
     let r;
+    console.groupCollapsed('extract_price_and_point');
+    console.assert(e, 'e');
     const s = e.innerHTML.replace(/(<style>.+?<\/style>|<[^>]+>|[\n ])+/gs, ' ');
-    //console.log("ext:", s);
+    console.log("ext:", s);
     if (r = s.match(/￥\s*(([0-9]{1,3})(,[0-9]{3})*)/)) {
         price = r[1].replaceAll(',', '');
-        //console.log(r[0]);
+        console.log('Yen', r[0]);
     }
-    if (e.querySelector('.a-icon-kindle-unlimited')) { // または、￥1,000で購入
+    if (e.querySelector('[class*=kindle-unlimited]')) { // または、￥1,000で購入
         if (r = s.match(/または、￥(([0-9]{1,3})(,[0-9]{3})*)で購入/)) {
             price = r[1].replaceAll(',', '');
-            //console.log(r[0]);
+            console.log('KU Yen', r[0]);
         }
     }
     if (r = s.match(/([0-9]+)(ポイント|pt)/)) {
         point = r[1];
-        //console.log(r[0]);
+        console.log('pt', r[0]);
     }
     if (! price && point) point = void 0;
 
-    //console.log([price, point]);
+    ksdebug.log("price-point", price, point);
+    console.groupEnd();
     return {'price': price, 'point': point};
 
     // ranking:
@@ -832,7 +858,7 @@ async function access_api(url) {
     try {
         res = await fetch(url).then(r => r.json())
     } catch (error) {
-        console.error(error)
+        console.error(error, url)
     }
     return res;
 }
@@ -858,7 +884,8 @@ function change_background_color(e, v, mode = "") { // 0 <= v <= 100
     const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
     const rgb = hex2rgb(color_hex).join(',');
     const rgba = `rgba(${rgb},${toumei})`;
-    if (mode == 'g') e.style.background = `linear-gradient(${rgba}, 90%, rgba(${rgb},0)`;
+    if (mode == 'g') e.style.background =
+	`linear-gradient(${rgba}, 90%, rgba(${rgb},0)`;
     else e.style.backgroundColor = rgba;
 }
 const hex2rgb = (hex) => {
@@ -981,22 +1008,6 @@ function insert_price_graph(asin, pinfo) {
 
     return true;
 }
-
-
-////////////////////////////////////////////////////////////////
-//// options
-let storage_items = {};
-let ksdebug; // for DEBUG MESSAGE
-async function read_storage_items() {
-    const get_storage = () =>
-          new Promise(resolve => chrome.storage.local.get(null, resolve));
-    return await get_storage();
-};
-//const storage_items =
-//      Object.keys(localStorage).map(name => {
-//        return {[name]: localStorage.getItem(name) ?? ''};
-//      });
-//console.log(storage_items);
 
 
 ////////////////////////////////////////////////////////////////

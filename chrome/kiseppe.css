@@ -12,10 +12,6 @@
     0% { font-size: 2em; color: transparent; bottom: 0.5em; }
   100% { }
 }
-@keyframes zoomin {
-    0%   { font-size: 2em; color: transparent; }
-    100% { }
-}
 @keyframes araware {
     0% { color: transparent; background-color: transparent; }
   100% { }
