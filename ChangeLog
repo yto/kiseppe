@@ -1,4 +1,12 @@
+2023-10-21  Tatsuwo  <yto at example.com>
+
+	* README.md: fix
+
+	* CHANGES.md: new.  リリースノートを書いていくファイル。
+
 2023-10-20  Tatsuwo  <yto at example.com>
+
+	* release: v2.0.0-alpha.3
 
 	* chrome/manifest.json: options を popup でも使うようにした
 

@@ -6,26 +6,25 @@ Browser (Chrome/Firefox) Extension : Price Hitory Graph for Japanese Amazon Kind
 
 ## 概要
 
-キセッペ (Kiseppe) とは、
+キセッペ (Kiseppe) は、
 Kindle セール情報サイト「キンセリ」のブラウザ拡張機能です。
 
-キセッペはアマゾンのキンドル書籍ページに価格推移グラフを直接表示します（データがあれば）。
-また、セール対象作品の場合はキンセリのセールまとめページへのリンクも表示します（データがあれば）。
+日本のアマゾン (amazon.co.jp) の Kindle 書籍ページに価格推移グラフを直接表示します。
+セール対象作品の場合はセールまとめページへのリンクも表示します。
+また、Kindle 本の検索結果ページ、著者ページ、ランキングページなどに割引情報を表示します。
 
-- [Kiseppe - Price Chart for Amazon Japan Kindle - Chrome ウェブストア](https://chrome.google.com/webstore/detail/kiseppe-price-chart-for-a/jhmbgbjpbiiklgmfabbcldoddlljplle) (2023/3/16 JST 公開)
-- [Kiseppe - Kindle Price Chart – 🦊 Firefox (ja) 向け拡張機能を入手](https://addons.mozilla.org/ja/firefox/addon/kiseppe-price-chart-kindle/) (2023/3/19 JST 公開)
+Kiseppe directly displays a price trend chart on Kindle book pages of Amazon Japan (amazon.co.jp).
+If the book is on sale, a link to the sale summary is provided.
+Additionally, it displays discount information on Kindle search results, author pages, ranking pages, and similar pages.
 
-## 注意
-
-日本のアマゾン (amazon.co.jp) の Kindle 書籍の個別作品ページでしか動作しません。
-
-- 動作する（グラフが表示される）Amazonページの例 (sample Amazon page)
-  - [黄泉のツガイ 1巻 (デジタル版ガンガンコミックス) | 荒川弘 | 少年マンガ | Kindleストア | Amazon](https://www.amazon.co.jp/gp/product/B09Y8YB5DP)
+詳しくは[キセッペの公式ページ](https://yapi.ta2o.net/kndlsl/kiseppe/)をご覧ください。
 
 ## リンク
 
 - [Kiseppe - Price Chart for Amazon Japan Kindle - Chrome ウェブストア](https://chrome.google.com/webstore/detail/kiseppe-price-chart-for-a/jhmbgbjpbiiklgmfabbcldoddlljplle)
+  - Chrome 拡張機能のブラウザ公式の入手先
 - [Kiseppe - Kindle Price Chart – 🦊 Firefox (ja) 向け拡張機能を入手](https://addons.mozilla.org/ja/firefox/addon/kiseppe-price-chart-kindle/)
+  - Firefox 拡張機能のブラウザ公式の入手先
 - [キセッペ (キンセリのブラウザ拡張機能)](https://yapi.ta2o.net/kndlsl/kiseppe/)
   - キセッペの公式ページです
 - [キンセリ](https://yapi.ta2o.net/kndlsl)
