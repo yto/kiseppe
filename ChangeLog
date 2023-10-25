@@ -1,5 +1,9 @@
 2023-10-25  Tatsuwo  <yto at example.com>
 
+	* release: v2.0.0-beta
+
+	* chrome/content-script.js: API の URL を本番用 (v2 用) のに変更
+
 	* version:
 	manifest.json の version 1.99.1.0 は release の 2.0.0-beta と同等。
 	（manifest.json の version には数字と"."しか書けない）

@@ -1,5 +1,10 @@
 # Release notes
 
+## v2.0.0-beta / 2023-10-25
+- feature: popup.html, options.html に運営側からのお知らせを表示する仕組み
+- update: API の URL を本番用 (v2 用) のに変更
+- delete: デバグ用の仕組みを削除（役目を終えたため）
+
 ## v2.0.0-alpha.3 / 2023-10-21
 - feature: options を popup でも使うようにした
 - fix: Kindle Unlimited が0円価格と認識されてしまい実質100%オフと表示されるバグ
