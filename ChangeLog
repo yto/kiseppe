@@ -1,3 +1,40 @@
+2023-10-25  Tatsuwo  <yto at example.com>
+
+	* version:
+	manifest.json の version 1.99.1.0 は release の 2.0.0-beta と同等。
+	（manifest.json の version には数字と"."しか書けない）
+	例:
+	1.99.0.3 = 2.0.0-alpha.3
+	1.99.1.0 = 2.0.0-beta
+	1.99.1.2 = 2.0.0-beta.2
+	1.99.2.0 = 2.0.0-rc
+	2.0.0 = 2.0.0
+	2.0.1 = 2.0.1
+	2.1.0 = 2.1.0
+	2.99.0.0 = 3.0.0-alpha
+
+2023-10-24  Tatsuwo  <yto at example.com>
+
+	* memo: untabify, change API urls
+
+2023-10-23  Tatsuwo  <yto at example.com>
+
+	* debug-message.*: ここから先は使わないでよさそうなので削除
+
+2023-10-22  Tatsuwo  <yto at example.com>
+
+	* chrome/options.js: 運営側からのお知らせを表示する仕組みを入れた。
+	お知らせは専用 API から fetch で取得し innerHTML に挿入する方式。
+
+	* memo: chrome と firefox での要素の表示ON/OFF
+	>>
+	.ch-only { display: none; }
+	_:lang(x)::-internal-media-controls-overlay-cast-button, .ch-only { display: inline }
+	.ff-only { display: none; }
+	_:lang(x)::-moz-placeholder, .ff-only { display: inline }
+	<<
+	options.html で場合分けをしようと思ったがやめたのでここにメモだけしておく。
+
 2023-10-21  Tatsuwo  <yto at example.com>
 
 	* README.md: fix

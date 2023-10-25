@@ -1,3 +1,8 @@
+const NOTICE_API = 'https://www.listasin.net/api/notice.cgi';
+
+const manifest = chrome.runtime.getManifest();
+console.log(manifest);
+
 const save_options = () =>
       document.querySelectorAll('#option-setting input').forEach(e => {
           const value = (e.type == 'checkbox') ? e.checked : e.value;
@@ -25,8 +30,19 @@ const init_options = () =>
 const show_storage = () =>
       chrome.storage.local.get(null, (items) => console.log(items));
 
+async function get_notice() {
+    const stamp = (new Date()).getUTCMinutes();
+    const version = manifest.version;
+    const browser = manifest.browser_specific_settings?.gecko ? 'firefox' : 'chrome';
+    console.log(version, browser);
+    const url = `${NOTICE_API}?stamp=${stamp}&version=${version}&browser=${browser}`;
+    await fetch(url).then(r => r.json()).then(j => {
+        document.getElementById('notice').innerHTML = j?.result?.str ?? '';
+    }).catch(error => console.error(error, url))
+}
 
 document.addEventListener('DOMContentLoaded', load_options);
+document.addEventListener('DOMContentLoaded', get_notice);
 
 [...document.querySelectorAll('input')].
     forEach(e => e.addEventListener('change', save_options));
@@ -39,5 +55,4 @@ document.getElementById('show_button').
     addEventListener('click', show_storage);
 document.getElementById('clear_button').
     addEventListener('click', () => chrome.storage.local.clear());
-
 
