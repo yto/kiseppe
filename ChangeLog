@@ -1,5 +1,10 @@
 2023-10-29  Tatsuwo  <yto at example.com>
 
+	* memo: カルーセルへの処理（カルーセル内の各作品にグラフ表示ボタンを設置する処理）をオプションとした。
+	デフォルトでは表示しない (false)。
+	まだ見ぬケースで暴走する可能性を危惧。
+	storage.local の opt_process_on_carousel で制御。
+
 	* chrome/manifest.json: これ要るのか否か。
 	>>
     "content_security_policy": {
@@ -10,7 +15,6 @@
 	今は無しにしておいてリジェクトされたらまた考える。
 
 	* memo: ChatGPT にコードレビューしてもらい、納得いったものを採用
-
 
 2023-10-26  Tatsuwo  <yto at example.com>
 

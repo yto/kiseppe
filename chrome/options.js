@@ -1,8 +1,5 @@
 const NOTICE_API = 'https://www.listasin.net/api/notice.cgi';
 
-const manifest = chrome.runtime.getManifest();
-console.log(manifest);
-
 const save_options = () =>
       document.querySelectorAll('#option-setting input').forEach(e => {
           const value = (e.type == 'checkbox') ? e.checked : e.value;
@@ -32,6 +29,7 @@ const show_storage = () =>
 
 async function get_notice() {
     const stamp = (new Date()).getUTCMinutes();
+    const manifest = chrome.runtime.getManifest();
     const version = manifest.version;
     const browser = manifest.browser_specific_settings?.gecko ? 'firefox' : 'chrome';
     console.log(version, browser);
@@ -48,9 +46,6 @@ async function get_notice() {
     } catch (error) {
         console.error(error, url);
     }
-    //await fetch(url).then(r => r.json()).then(j => {
-    //    document.getElementById('notice').innerHTML = j?.result?.str ?? '';
-    //}).catch(error => console.error(error, url))
 }
 
 document.addEventListener('DOMContentLoaded', load_options);

@@ -58,6 +58,7 @@ const KS_IF_API = 'https://www.listasin.net/api/0200/chex/'; // iframe
 let KS_JD_API = 'https://www.listasin.net/api/0200_jd.cgi?asins='; // json
 const DEBUG_API = 'https://www.listasin.net/api/debug-logging.cgi?asins=';
 let JSDR_CUTOFF = 15;
+let PROCESS_ON_CAROUSEL = false;
 let storage_items = {};
 
 let console_groupCollapsed = () => {};
@@ -96,6 +97,8 @@ async function main() {
         KS_JD_API = DEBUG_API;
     if (storage_items?.opt_jsdr_cutoff)
         JSDR_CUTOFF = Number(storage_items.opt_jsdr_cutoff);
+    if (storage_items?.opt_process_on_carousel)
+        PROCESS_ON_CAROUSEL = true;
     if (storage_items?.opt_activate_console_log) {
         console_groupCollapsed = (...s) => console.groupCollapsed(...s);
         console_groupEnd = (...s) => console.groupEnd(...s);
@@ -141,7 +144,8 @@ async function main() {
         console_log("kiseppe: here is Kindle ASIN Page");
         kindle_asin_page();
         if (storage_items?.opt_asin_page_only) return;
-        if (storage_items?.opt_ignore_carousel) return;
+        //if (storage_items?.opt_ignore_carousel) return;
+        if (!PROCESS_ON_CAROUSEL) return;
 
         await kindle_carousel_component();
         console_log("wait a few seconds");
@@ -178,7 +182,8 @@ async function main() {
 
         console_log("kiseppe: here is Kindle Octpus Page");
         kindle_octopus_component();
-        if (storage_items?.opt_ignore_carousel) return;
+        //if (storage_items?.opt_ignore_carousel) return;
+        if (!PROCESS_ON_CAROUSEL) return;
         kindle_carousel_component();
 
     } else if (document.querySelector('title') &&
@@ -186,7 +191,8 @@ async function main() {
 
         console_log("kiseppe: here is Kindle Author Page");
         kindle_author_component();
-        if (storage_items?.opt_ignore_carousel) return;
+        //if (storage_items?.opt_ignore_carousel) return;
+        if (!PROCESS_ON_CAROUSEL) return;
         await kindle_carousel_component();
 
         const e = document.querySelector('#authorPageBooks');
@@ -207,7 +213,8 @@ async function main() {
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
 
-        if (storage_items?.opt_ignore_carousel) return;
+        //if (storage_items?.opt_ignore_carousel) return;
+        if (!PROCESS_ON_CAROUSEL) return;
         kindle_carousel_component();
 
     } else if (document.querySelector(
@@ -254,7 +261,8 @@ async function main() {
     } else if (/manga-store/.test(location.href)) {
 
         console_log("kiseppe: here is Kindle Manga Store Page");
-        if (storage_items?.opt_ignore_carousel) return;
+        //if (storage_items?.opt_ignore_carousel) return;
+        if (!PROCESS_ON_CAROUSEL) return;
         await kindle_carousel_component();
 
         const e = document.querySelector('.msw-page');
@@ -272,7 +280,8 @@ async function main() {
     )) {
 
         console_log("kiseppe: here is Kindle Store Page (Others)");
-        if (storage_items?.opt_ignore_carousel) return;
+        //if (storage_items?.opt_ignore_carousel) return;
+        if (!PROCESS_ON_CAROUSEL) return;
         kindle_carousel_component();
 
     } else {

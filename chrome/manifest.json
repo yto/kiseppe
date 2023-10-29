@@ -1,7 +1,7 @@
 {
     "name": "Kiseppe - Price Chart for Amazon Japan Kindle",
     "description": "Adds price history charts to Amazon Japan Kindle book pages.  It works only on www.amazon.co.jp.",
-    "version": "1.99.1.0",
+    "version": "1.99.1.1",
     "homepage_url": "https://yapi.ta2o.net/kndlsl/kiseppe/",
     "manifest_version": 3,
     "icons": {
