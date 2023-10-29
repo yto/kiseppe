@@ -1,6 +1,16 @@
 2023-10-29  Tatsuwo  <yto at example.com>
 
+	* chrome/manifest.json: これ要るのか否か。
+	>>
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://www.listasin.net/api/;",
+        "content_scripts": "default-src 'self'; connect-src https://www.listasin.net/api/;"
+    },
+	<<
+	今は無しにしておいてリジェクトされたらまた考える。
+
 	* memo: ChatGPT にコードレビューしてもらい、納得いったものを採用
+
 
 2023-10-26  Tatsuwo  <yto at example.com>
 
