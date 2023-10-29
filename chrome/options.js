@@ -36,9 +36,21 @@ async function get_notice() {
     const browser = manifest.browser_specific_settings?.gecko ? 'firefox' : 'chrome';
     console.log(version, browser);
     const url = `${NOTICE_API}?stamp=${stamp}&version=${version}&browser=${browser}`;
-    await fetch(url).then(r => r.json()).then(j => {
-        document.getElementById('notice').innerHTML = j?.result?.str ?? '';
-    }).catch(error => console.error(error, url))
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.error(`Network response was not ok: ${response.statusText}`);
+            return;
+        }
+        const json = await response.json();
+        const noticeElement = document.getElementById('notice');
+        if (noticeElement) noticeElement.innerHTML = json?.result?.str ?? '';
+    } catch (error) {
+        console.error(error, url);
+    }
+    //await fetch(url).then(r => r.json()).then(j => {
+    //    document.getElementById('notice').innerHTML = j?.result?.str ?? '';
+    //}).catch(error => console.error(error, url))
 }
 
 document.addEventListener('DOMContentLoaded', load_options);

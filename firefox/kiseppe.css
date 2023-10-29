@@ -1,11 +1,4 @@
 /*
-  for DEBUG
-*/
-.kiseppe-debug {
-    border: dotted 2px rgba(255,0,0,0.5);
-}
-
-/*
   animation
 */
 @keyframes zoomin_bottom_left {

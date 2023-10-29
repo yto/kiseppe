@@ -1,3 +1,15 @@
+2023-10-29  Tatsuwo  <yto at example.com>
+
+	* memo: ChatGPT にコードレビューしてもらい、納得いったものを採用
+
+2023-10-26  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: API仕様変更。セール判定精度向上のため、検索結果ページなどでも API のパラメータに価格・ポイント還元情報を追加。
+
+	* chrome/options.html: console.log, console.group* のON/OFF
+
+	* chrome/content-script.js: console.log, console.group* のON/OFF
+
 2023-10-25  Tatsuwo  <yto at example.com>
 
 	* release: v2.0.0-beta
