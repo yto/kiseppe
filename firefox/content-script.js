@@ -917,7 +917,17 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
     b.classList.add(class_name);
     b.style.top = yp;
     b.style.right = xp;
-    b.innerHTML = `実質<br><b>${jsdr}%</b></br>オフ`;
+
+    //if (typeof(jsdr) !== 'number') return false;
+    //b.innerHTML = `実質<br><b>${jsdr}%</b></br>オフ`;
+    b.appendChild(document.createTextNode('実質'));
+    b.appendChild(document.createElement('br'));
+    const bj = document.createElement('b');
+    bj.textContent = jsdr + '%';
+    b.appendChild(bj);
+    b.appendChild(document.createElement('br'));
+    b.appendChild(document.createTextNode('オフ'));
+    
     const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
     const rgb = hex2rgb(color_hex).map(v => Math.round(v/1.5)).join(',');
     b.style.backgroundColor = `rgba(${rgb})`;
@@ -967,15 +977,33 @@ function build_price_graph_dialog(asin, title, pinfo={}) {
         }
 
         // insert a graph content wrapper to <dialog>
-        pp.innerHTML = `
-<div id="pg_container">
-  <div class="pg_item_info">
-    <div class="pg_item_title">${title}</div>
-    <iframe src="${url}" scrolling="no"></iframe>
-  </div>
-  <button onclick="document.getElementById('popup_modal').close()">Close</button>
-</div>
-`;
+        // <div id="pg_container">
+        //   <div class="pg_item_info">
+        //     <div class="pg_item_title">${title}</div>
+        //     <iframe src="${url}" scrolling="no"></iframe>
+        //   </div>
+        //   <button onclick="document.getElementById('popup_modal').close()">Close</button>
+        // </div>
+        const pgContainer = document.createElement('div');
+        pgContainer.id = 'pg_container';
+        const pgItemInfo = document.createElement('div');
+        pgItemInfo.className = 'pg_item_info';
+        const pgItemTitle = document.createElement('div');
+        pgItemTitle.className = 'pg_item_title';
+        pgItemTitle.textContent = title;
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.scrolling = 'no';
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'Close';
+        closeButton.addEventListener('click', () => pp.close());
+        pgItemInfo.appendChild(pgItemTitle);
+        pgItemInfo.appendChild(iframe);
+        pgContainer.appendChild(pgItemInfo);
+        pgContainer.appendChild(closeButton);
+        pp.innerHTML = '';
+        pp.appendChild(pgContainer);
+
         document.getElementById("popup_modal").showModal();
 
         event.stopPropagation();
@@ -1009,7 +1037,13 @@ function insert_price_graph(asin, pinfo) {
     //// display a price graph
     // build iframe
     const new_elm = document.createElement('div');
-    new_elm.innerHTML = `<iframe src="${url}" scrolling="no" id="kiseppe"></iframe>`;
+    //new_elm.innerHTML = `<iframe src="${url}" scrolling="no" id="kiseppe"></iframe>`;
+    const im = document.createElement('iframe');
+    im.id = 'kiseppe';
+    im.src = url;
+    im.scrolling = 'no';
+    new_elm.appendChild(im);
+
     // insert iframe
     const base_elm = document.getElementById('ATFCriticalFeaturesDataContainer');
     if (!base_elm) {
