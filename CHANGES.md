@@ -1,7 +1,10 @@
 # Release notes
 
+## v2.0.0 / 2023-11-01
+- Chrome, Firefox の審査に通った版 (rc と同じ)
+
 ## v2.0.0-rc / 2023-10-30
-- Charome, Firefox の審査に出した版
+- Chrome, Firefox の審査に出した版
 
 ## v2.0.0-beta.2 / 2023-10-29
 - downgrade: まだ見ぬケースで暴走する可能性を危惧し、カルーセルへの処理をオプションとした
