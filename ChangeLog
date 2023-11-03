@@ -1,20 +1,26 @@
+2023-11-03  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: new wishlist_component().
+	ほしい物リストにも対応（オプション）
+
+	* chrome/content-script.js:
+	Kindleページ判定失敗例:
+	NG https://www.amazon.co.jp/dp/B07DHFQCTJ/?sr=8-1
+	OK https://www.amazon.co.jp/dp/B07DHFQCTJ
+	修正:
+        OLD: document.getElementById('nav-search-label-id');
+	NEW: document.querySelector('#nav-subnav .nav-a-content')
+
+	* memo: 次のリリース v2.0.1
+	- innerHTML で変数を使っている箇所の脆弱性対応 (APIサーバが乗っ取られると危険なため)
+	- Kindle ページか否かの判定ロジックの修正 (グラフが挿入されないケースがあった)
+	- ほしい物リスト (wishlist) ページにも対応
+
 2023-11-01  Tatsuwo  <yto at example.com>
 
 	* release: v2.0.0
 	Chrome 審査通る(11/1)
 	Firefox 審査通る(10/30)
-
-	* chrome/content-script.js: あとで修正
-	Kindleページ判定失敗例:
-	NG https://www.amazon.co.jp/dp/B07DHFQCTJ/?sr=8-1
-	OK https://www.amazon.co.jp/dp/B07DHFQCTJ
-	修正案:
-        OLD: let c = document.getElementById('nav-search-label-id');
-	NEW: let c = document.querySelector('#nav-subnav .nav-a-content')
-
-	* memo: 次のリリース
-	- innerHTML で変数を使っている箇所の脆弱性対応 (APIサーバが乗っ取られると危険なため)
-	- Kindle ページか否かの判定ロジックの修正 (グラフが挿入されないケースがあった)
 
 2023-10-30  Tatsuwo  <yto at example.com>
 

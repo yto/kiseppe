@@ -36,6 +36,10 @@
 // - Kindle Page (特別設定なし)
 //   - multiby https://www.amazon.co.jp/kindle-dbs/multibuy?basketId=Gz2UUPLE
 //   - stores page https://www.amazon.co.jp/stores/page/EF53E35F-2FAF-49AC-B191-257E764F2703
+// - Wishlist Page
+//   - insert:[price-graph-iframe][item-jsdr]
+//   - observe
+//   - wait
 //
 // Components:
 // - Kindle Author Component
@@ -74,23 +78,13 @@ let console_count = () => {};
 // 動的に内容が変化するページには observer を使う
 async function main() {
 
-    //// Kindle のページじゃないときは何もせずに終わる
+    //// Kindle 関連ページじゃないときは何もせずに終わる
     // Kindle 関連ページの判定方法: 上のメニューバーの一番左に "Kindle" が含まれる
-    if (!/Kindle/.test(document.querySelector('.nav-a-content')?.textContent))
-        return;
-    console_log("Kiseppe: start processing on Kindle related page")
+    //   "ほしい物リスト" も対象とする (v2.0.1-)
+    const chk = document.querySelector('#nav-subnav .nav-a-content')?.textContent;
+    if (!/Kindle|ほしい物リスト/.test(chk)) return;
 
     // options
-    // async function read_storage_items() {
-    //     const get_storage = () =>
-    //           new Promise(resolve => chrome.storage.local.get(null, resolve));
-    //     return await get_storage();
-    // };
-    //const read_storage_items = async () => await get_storage();
-    //storage_items = await read_storage_items();
-    //const get_storage = () =>
-    //new Promise(resolve => chrome.storage.local.get(null, resolve));
-    //storage_items = await get_storage();
     storage_items = await new Promise(r => chrome.storage.local.get(null, r)).
         catch(error => console.error(error));
     if (storage_items?.opt_use_debug_api == true)
@@ -105,6 +99,8 @@ async function main() {
         console_log = (...s) => console.log(...s);
         console_count = (...s) => console.count(...s);
     }
+
+    console_log("Kiseppe: start processing on Kindle related page")
     console_log("options", storage_items)
 
     // callback function for observer
@@ -135,11 +131,26 @@ async function main() {
         f2(mutations, observer);
     };
 
-    if (document.getElementById('ASIN')) {
 
-        // Is this page for a Kindle book?
-        let c = document.getElementById('nav-search-label-id');
-        if (!c || !c.textContent.match(/Kindle/m)) return;
+    if (/ほしい物リスト/.test(chk)) {
+	if (!storage_items?.opt_process_on_wishlist) return;
+
+        await wishlist_page();
+        const e = document.querySelector('ul#g-items');
+        console.assert(e);
+        if (! e) return;
+        const callback = generate_callback(e, wishlist_page);
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
+
+    } // case: /Kindle/.test(chk) === true
+    else if (document.getElementById('ASIN')) {
+
+        // // Is this page for a Kindle book?
+        // let c = document.querySelector('#nav-subnav .nav-a-content')
+        // //let c = document.getElementById('nav-search-label-id');
+        // if (!c || !c.textContent.match(/Kindle/m)) return;
+        // ^^^ 冒頭で確認済み
 
         console_log("kiseppe: here is Kindle ASIN Page");
         kindle_asin_page();
@@ -334,6 +345,48 @@ async function kindle_asin_page() {
     const x = document.querySelector('#leftCol'); // '#imageBlock'
     show_jsdr_badge(x, jsdr, "0", "0");
     change_background_color(x, jsdr, 'g');
+
+    return;
+}
+
+//// Wishlist Page
+// Ex. https://www.amazon.co.jp/hz/wishlist/ls/
+async function wishlist_page() {
+
+    // collect ASINs for API access and put price graph buttons
+    const a2pinfo = {};
+    const asins = [];
+    //document.querySelectorAll('li[data-itemid]')
+    //[...document.querySelectorAll('li[data-itemid]')].map(e => e.querySelector('.g-itemImage'))
+    document.querySelectorAll('li[data-itemid]').forEach(cntn => {
+        if (cntn.querySelector('.kiseppe-pg-btn')) return;
+        const ic = cntn.querySelector('.g-itemImage');
+        if (! ic) return;
+        if (!/Kindle版/.test(cntn.textContent)) return;
+
+        const asin = get_asin_in_href(ic.querySelector('a'));
+        asins.push(asin);
+        cntn.dataset.asin = asin;
+        const item_title = ic.querySelector('a')?.getAttribute('title');
+        a2pinfo[asin] = extract_price_and_point(cntn);
+        put_price_graph_button(cntn, asin, item_title, a2pinfo[asin]);
+    });
+    if (asins.length <= 0) return;
+    const asins_pp = add_priceinfo_to_asinlist(asins, a2pinfo);
+    
+    // API access
+    const url = KS_JD_API + asins_pp.join(",");
+    const res = await access_api(url);
+
+    // display jsdr information
+    Object.keys(res?.result?.books || []).forEach(asin => {
+        const cntn = document.querySelector(`li[data-asin=${asin}]`);
+        const jsdr = get_jsdr(asin, res, a2pinfo);
+        if (jsdr < JSDR_CUTOFF) return;
+        const ca = cntn.querySelector('.g-itemImage');
+        show_jsdr_badge(ca, jsdr, "0", "0");
+        change_background_color(cntn, jsdr);
+    });
 
     return;
 }
