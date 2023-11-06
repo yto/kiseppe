@@ -121,7 +121,6 @@ async function main() {
         let is_mutation_detected = false;
         for (let mu of mutations) {
             if (exs.filter(x => x.contains(mu.target)).length > 0)
-            //if (exs.some(x => x.contains(mu.target)))
                 continue; // ignore changes if mutation is a child of node qs
             is_mutation_detected = true;
             break;
@@ -133,9 +132,11 @@ async function main() {
 
 
     if (/ほしい物リスト/.test(chk)) {
-	if (!storage_items?.opt_process_on_wishlist) return;
+
+        if (!storage_items?.opt_process_on_wishlist) return;
 
         await wishlist_page();
+
         const e = document.querySelector('ul#g-items');
         console.assert(e);
         if (! e) return;
@@ -145,12 +146,6 @@ async function main() {
 
     } // case: /Kindle/.test(chk) === true
     else if (document.getElementById('ASIN')) {
-
-        // // Is this page for a Kindle book?
-        // let c = document.querySelector('#nav-subnav .nav-a-content')
-        // //let c = document.getElementById('nav-search-label-id');
-        // if (!c || !c.textContent.match(/Kindle/m)) return;
-        // ^^^ 冒頭で確認済み
 
         console_log("kiseppe: here is Kindle ASIN Page");
         kindle_asin_page();
@@ -193,7 +188,6 @@ async function main() {
 
         console_log("kiseppe: here is Kindle Octpus Page");
         kindle_octopus_component();
-        //if (storage_items?.opt_ignore_carousel) return;
         if (!PROCESS_ON_CAROUSEL) return;
         kindle_carousel_component();
 
@@ -202,7 +196,6 @@ async function main() {
 
         console_log("kiseppe: here is Kindle Author Page");
         kindle_author_component();
-        //if (storage_items?.opt_ignore_carousel) return;
         if (!PROCESS_ON_CAROUSEL) return;
         await kindle_carousel_component();
 
@@ -224,7 +217,6 @@ async function main() {
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
 
-        //if (storage_items?.opt_ignore_carousel) return;
         if (!PROCESS_ON_CAROUSEL) return;
         kindle_carousel_component();
 
@@ -272,7 +264,7 @@ async function main() {
     } else if (/manga-store/.test(location.href)) {
 
         console_log("kiseppe: here is Kindle Manga Store Page");
-        //if (storage_items?.opt_ignore_carousel) return;
+
         if (!PROCESS_ON_CAROUSEL) return;
         await kindle_carousel_component();
 
@@ -291,7 +283,7 @@ async function main() {
     )) {
 
         console_log("kiseppe: here is Kindle Store Page (Others)");
-        //if (storage_items?.opt_ignore_carousel) return;
+
         if (!PROCESS_ON_CAROUSEL) return;
         kindle_carousel_component();
 
@@ -604,8 +596,6 @@ async function kindle_series_page() {
     // display jsdr information
     const sr_jsdr = get_series_jsdr(srasin, res);
     if (sr_jsdr >= JSDR_CUTOFF) {
-        //let c = document.getElementById('collection-masthead__title');
-        //if (! c) c = document.getElementById('collection-title');
         const c = document.getElementById('collection-masthead__title') ??
               document.getElementById('collection-title');
         if (c) show_series_sale_badge(c.parentNode);
@@ -752,7 +742,6 @@ async function kindle_carousel_component() {
           'div[class*="a-carousel-row-inner"], ' +
           'div[class*="octopus-pc-card-content"]'
     document.querySelectorAll(qs_carousel).forEach(ca => {
-        //if (ca.querySelector('.kiseppe-pg-btn')) return; // button already exists
         if (ca.querySelector('img[alt="likes icon"]'))
             return; // manga-store mateba-muryou's "likes" icon
         if (ca.querySelector('span[class*="collection-type"]'))
@@ -971,8 +960,7 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
     b.style.top = yp;
     b.style.right = xp;
 
-    //if (typeof(jsdr) !== 'number') return false;
-    //b.innerHTML = `実質<br><b>${jsdr}%</b></br>オフ`;
+    // `実質<br><b>${jsdr}%</b></br>オフ`
     b.appendChild(document.createTextNode('実質'));
     b.appendChild(document.createElement('br'));
     const bj = document.createElement('b');
@@ -1090,7 +1078,6 @@ function insert_price_graph(asin, pinfo) {
     //// display a price graph
     // build iframe
     const new_elm = document.createElement('div');
-    //new_elm.innerHTML = `<iframe src="${url}" scrolling="no" id="kiseppe"></iframe>`;
     const im = document.createElement('iframe');
     im.id = 'kiseppe';
     im.src = url;
