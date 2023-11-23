@@ -1,5 +1,8 @@
 2023-11-23  Tatsuwo  <yto at example.com>
 
+	* chrome/kiseppe.css (.kiseppe-series-sale-badge):
+	add "color: red;" (for Windows Chrome)
+
 	* chrome/content-script.js: extract_price_and_point()
 	- ASINページで紙の本の値を見に行かないようにした。
 	- KU のときの価格の取り方を修正
