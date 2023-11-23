@@ -25,7 +25,7 @@
           価格推移グラフの表示のみ（version 1.0 相当）
         </label>
         <label>
-          <input type="checkbox" id="opt_process_on_wishlist">
+          <input type="checkbox" id="opt_process_on_wishlist" checked>
           <a target="_blank" href="https://www.amazon.co.jp/hz/wishlist/ls">ほしい物リスト</a>への処理を行う
         </label>
         <label>
@@ -62,13 +62,13 @@
                 <input type="checkbox" id="opt_process_on_carousel">
                 カルーセルへの処理を行う
               </label>
-              <!-- <label>
-                <input type="checkbox" id="opt_ignore_carousel">
-                カルーセルへの処理を行わない
-              </label> -->
               <label>
                 <input type="checkbox" id="opt_activate_console_log">
                 console.log を有効にする
+              </label>
+              <label>
+                <input type="text" id="opt_user_id" value="" size="8">
+                User ID for Kiseppe API
               </label>
               <button id="show_button">Show storage (console)</button>
               <button id="clear_button">Clear storage</button>
@@ -80,6 +80,11 @@
         <div id="cr">
           <a target="_blank" href="https://yapi.ta2o.net/kndlsl/kiseppe/">キセッペ (Kiseppe)</a>
           powered by <a target="_blank" href="https://yapi.ta2o.net/kndlsl/">キンセリ</a>
+          <div style="font-size: x-small; padding: 0.5rem 0 0 0">
+            ご意見・ご感想・ご要望・バグ報告などありましたら
+            <a target="_blank" href="https://yapi.ta2o.net/kndlsl/kiseppe/postamessage.html">キセッペご意見箱</a>
+            へ！
+          </div>
         </div>
     </main>
     <script src="options.js"></script>

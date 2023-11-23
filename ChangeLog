@@ -1,3 +1,46 @@
+2023-11-23  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: extract_price_and_point()
+	- ASINページで紙の本の値を見に行かないようにした。
+	- KU のときの価格の取り方を修正
+	- Ex. https://www.amazon.co.jp/dp/B09FPWBCLL
+	> '.selected'
+	> Kindle版 (電子書籍)
+	> ￥0 Kindle Unlimited
+	> ￥11
+	> '.unselected'
+	> コミック (紙)
+	> ￥306
+	> 獲得ポイント: 3pt
+
+	* chrome/content-script.js: calc_jsdr()
+	実質割引率が100%でも実質価格1円以上のときがあり、そのときは99%にする。
+	なお、API 側でもこの処理を行っていない箇所があったので修正した。
+
+	* chrome/options.js, chrome/options.html:
+	「ほしい物リスト」のキンドル本に割引情報を表示するオプションをデフォルトONにする
+	https://twitter.com/kinselist/status/1726798690747404502
+
+2023-11-17  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	「167%オフ」が出た報告あり。
+	その対応策として、
+	get_jsdr() で実質割引率が 0 以上 100 以下でない場合は一律 0 にする。
+
+	* chrome/options.html:
+	- キセッペご意見箱へのリンク
+
+2023-11-12  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	- access_api() => access_api_params(params)
+	- User ID for Kiseppe API
+
+	* chrome/options.js: User ID for Kiseppe API
+
+	* chrome/options.html: User ID for Kiseppe API
+
 2023-11-07  Tatsuwo  <yto at example.com>
 
 	* memo: v2.0.1 公式公開

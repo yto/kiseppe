@@ -19,8 +19,10 @@ const load_options = () =>
 const init_options = () =>
       document.querySelectorAll('#option-setting input').forEach(e => {
           if (e.id == 'opt_bgcolor_hex') e.value = '#FF0000';
-          else if (e.id == 'opt_jsdr_cutoff') e.value = "15";
+          else if (e.id == 'opt_jsdr_cutoff') e.value = '15';
+          else if (e.id == 'opt_process_on_wishlist') e.checked = true;
           else if (e.type == 'checkbox') e.checked = false;
+          else if (e.type == 'text') e.value = '';
           else e.value = '';
       });
 
