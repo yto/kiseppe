@@ -34,6 +34,7 @@
     /* animation: araware 1.5s; */
 }
 .kiseppe-series-sale-badge {
+    color: red; /* only for Windows Chrome */
     animation-name: araware;
     animation-duration: 0.7s;
     animation-iteration-count: 3;
