@@ -1,4 +1,18 @@
+2023-11-24  Tatsuwo  <yto at example.com>
+
+	* memo: v2.0.3 公式公開
+	Chrome も Firefox も審査は当日通る。
+
+	* chrome/content-script.js: extract_price_and_point()
+	いまさらながらエラーハンドリング追加。
+	これらに対処：
+	- キーワード検索で検索結果が少なくKindle以外のカテゴリの商品が表示されるときに処理が止まるケース
+	- ほしい物リストで配信停止作品があると処理が止まるケース
+
 2023-11-23  Tatsuwo  <yto at example.com>
+
+	* memo: v2.0.2 公式公開
+	Chrome も Firefox も審査は即日通る。
 
 	* chrome/kiseppe.css (.kiseppe-series-sale-badge):
 	add "color: red;" (for Windows Chrome)

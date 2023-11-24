@@ -82,7 +82,7 @@ async function main() {
     // Kindle 関連ページの判定方法: 上のメニューバーの一番左に "Kindle" が含まれる
     //   "ほしい物リスト" も対象とする (v2.0.1-)
     const chk =
-	  document.querySelector('#nav-subnav .nav-a-content')?.textContent;
+          document.querySelector('#nav-subnav .nav-a-content')?.textContent;
     if (!/Kindle|ほしい物リスト/.test(chk)) return;
 
     // options
@@ -740,7 +740,7 @@ async function kindle_carousel_component() {
             return; // ASIN page non-kindle-books
         console_log('kiseppe: > general carousel');
         ca.querySelectorAll(
-	    'li a[href*="/dp/B"] img[alt], ' +
+            'li a[href*="/dp/B"] img[alt], ' +
                 'li a[href^="/gp/product/B"] img[alt], ' + 
                 'li a[href*="%2Fdp%2FB"] img[alt]'
         ).forEach(e => {
@@ -811,29 +811,33 @@ function extract_price_and_point(e) {
     let price;
     let point;
 
-    // const html_str = e.querySelector('.selected') ?
-    //    [...e.querySelectorAll('.selected')].map(n => n.innerHTML).join(' ') :
-    //       e.innerHTML;
-    // const s = html_str.replace(/(<style>.+?<\/style>|<[^>]+>|\s)+/gs, ' ');
-    const elms = [...e.querySelectorAll('.selected')];
-    const html =  (elms.length ? elms : [e]).map(n => n.innerHTML).join(' ');
-    const s = html.replace(/(<style>.+?<\/style>|<[^>]+>|\s)+/gs, ' ');
-    console_log("ext:", s);
+    try {
+        const elms = [...e.querySelectorAll('.selected')];
+        const html =  (elms.length ? elms : [e]).map(n => n.innerHTML).join(' ');
+        const s = html.replace(/(<style>.+?<\/style>|<[^>]+>|\s)+/gs, ' ');
+        console_log("ext:", s);
 
-    let r = s.match(/￥\s*\d{1,3}(,\d{3})*/g).map(m => m.replace(/\D+/g, ''));
-    if (s.match(/[Uu]nlimited/)) { // KU のときは 0 円以外の金額(MAX)を選択
-        price = Math.max(...r);
-        console_log('KU Yen', price, r);
-    } else {
-        price = r[0];
-        console_log('Yen', price, r);
-    }
+        let r = s.match(/￥\s*\d{1,3}(,\d{3})*/g);
+        if (r) {
+            r = r.map(m => m.replace(/\D+/g, ''));
+            if (s.match(/[Uu]nlimited/)) { // KU のときは 0 円以外の金額(MAX)を選択
+                price = Math.max(...r);
+                console_log('KU Yen', price, r);
+            } else {
+                price = r[0];
+                console_log('Yen', price, r);
+            }
+        }
 
-    if (r = s.match(/(\d+)(ポイント|pt)/)) {
-        point = r[1];
-        console_log('pt', r[0]);
+        if (r = s.match(/(\d+)(ポイント|pt)/)) {
+            point = r[1];
+            console_log('pt', r[0]);
+        }
+        if (!price && point) point = void 0;
+
+    } catch (error) {
+        console.error('Error:', error);
     }
-    if (!price && point) point = void 0;
 
     console_log("price-point", price, point);
     console_groupEnd();
@@ -890,23 +894,6 @@ function extract_price_and_point(e) {
     // carousel(manga-store):
     // <div class="_manga-store-shoveler_style_price-and-points-container__1GAeM"><span class="a-size-small _manga-store-shoveler_style_price__2BiWS"> ￥340 </span><span class="a-size-small _manga-store-shoveler_style_points__3-ajg"> 4pt (1%) </span></div>
 }
-
-// async function access_api(url) {
-//     console_log('API URL: ' + url);
-//     console_count('api access');
-//     if (storage_items?.opt_no_api_access) return {};
-//     try {
-//         const response = await fetch(url);
-//         if (!response.ok) {
-//             console.error('Network response was not ok ' + response.statusText);
-//             return {};
-//         }
-//         return await response.json();
-//     } catch (error) {
-//         console.error(error, url);
-//         return {};
-//     }
-// }
 
 async function access_api_params(params) {
     let url = KS_JD_API + params;
