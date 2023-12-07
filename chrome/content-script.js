@@ -229,7 +229,7 @@ async function main() {
 
         const e = document.querySelector('div[id=series-childAsin-widget]');
         // シリーズASINはあるが作品はない場合 ex. B09YL554L6
-        if (!e) retrun;
+        if (!e) return;
 
         const callback =
               generate_callback_ex(e, '#countdown_timer', kindle_series_page);

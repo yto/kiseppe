@@ -1,3 +1,7 @@
+2023-12-07  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js: retrun => return (はずかしいタイポ)
+
 2023-11-24  Tatsuwo  <yto at example.com>
 
 	* memo: v2.0.3 公式公開
