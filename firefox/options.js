@@ -44,7 +44,6 @@ async function get_notice() {
         }
         const json = await response.json();
         const noticeElement = document.getElementById('notice');
-        //if (noticeElement) noticeElement.innerHTML = json?.result?.str ?? '';
         if (noticeElement) noticeElement.textContent = json?.result?.str ?? '';
     } catch (error) {
         console.error(error, url);

@@ -78,12 +78,42 @@ let console_count = () => {};
 // 動的に内容が変化するページには observer を使う
 async function main() {
 
+    //// スマホ表示なのかの判定
+    const sma = document.querySelector('html').classList.contains('a-touch');
+    if (sma) console.log('Kiseppe: smart phone view');
+
     //// Kindle 関連ページじゃないときは何もせずに終わる
+    let ok_flag = 0;
+    let is_asin_page = 0;
+    let is_wishlist_page = 0;
+
     // Kindle 関連ページの判定方法: 上のメニューバーの一番左に "Kindle" が含まれる
-    //   "ほしい物リスト" も対象とする (v2.0.1-)
-    const chk =
-          document.querySelector('#nav-subnav .nav-a-content')?.textContent;
-    if (!/Kindle|ほしい物リスト/.test(chk)) return;
+    // PC page: #nav-subnav a[aria-label]
+    // SP page(manga): #manga-mobile-subnav a[aria-label]
+    //chk += document.querySelector('#nav-subnav .nav-a-content')?.textContent;
+    let chk = document.querySelector('#nav-subnav a[aria-label]')?.textContent;
+    //chk += document.querySelector('#manga-mobile-subnav a[aria-label]')?.textContent;
+    if (/Kindle/.test(chk)) ok_flag = 1;
+
+    if (document.querySelector('#tmm-grid-swatch-KINDLE,#tmm-grid-swatch-OTHER')?.classList.contains('selected')) {
+        // ASIN page 判定 (PC/SP 共通)
+        ok_flag = 1;
+        is_asin_page = 1;
+        console.log('judged: PC/SP ASIN page');
+    } else if (/ほしい物リスト/.test(
+        document.querySelector('meta[property="og:title"]')?.getAttribute('content')
+    )) {
+        // ほしい物リストページの判定 (PC/SP 共通)
+        // <meta property="og:title" content="Amazonほしい物リストを一緒に編集しましょう">
+        chk = document.querySelector('meta[property="og:title"]')?.getAttribute('content');
+        if (/ほしい物リスト/.test(chk)) {
+            ok_flag = 1;
+            is_wishlist_page = 1;
+            console.log('judged: PC/SP wishlist');
+        }
+    }
+
+    if (!ok_flag) return;
 
     // options
     storage_items = await new Promise(r => chrome.storage.local.get(null, r)).
@@ -132,13 +162,14 @@ async function main() {
     };
 
 
-    if (/ほしい物リスト/.test(chk)) {
+    if (is_wishlist_page) {
 
         if (!storage_items?.opt_process_on_wishlist) return;
 
         await wishlist_page();
 
-        const e = document.querySelector('ul#g-items');
+        const e = document.querySelector('ul#g-items, ul#awl-list-items');
+        // PC page: ul#g-items / SP page: ul#awl-list-items
         console.assert(e);
         if (!e) return;
         const callback = generate_callback(e, wishlist_page);
@@ -146,7 +177,8 @@ async function main() {
         observer.observe(e, config);
 
     } // case: /Kindle/.test(chk) === true
-    else if (document.getElementById('ASIN')) {
+    //else if (document.getElementById('ASIN')) {
+    else if (is_asin_page) {
 
         console_log("kiseppe: here is Kindle ASIN Page");
         kindle_asin_page();
@@ -174,7 +206,10 @@ async function main() {
         observer.observe(e, config);
 
     } else if (storage_items?.opt_asin_page_only) {
-        return
+
+        // 当該オプション指定されていれば ASIN ページ以外の処理は行わない
+        return;
+
     } else if (document.querySelector(
         'div[id="browse-views-area"] div[class*="browse-clickable-item"]'
     )) {
@@ -308,15 +343,30 @@ async function main() {
 //// Kindle ASIN page
 // Ex. https://www.amazon.co.jp/dp/B0C5QMW1JY
 async function kindle_asin_page() {
-    const asin = document.getElementById('ASIN').value;
+    //const asin = document.getElementById('ASIN').value; // PC page only
+    const asin = (document.URL.match(/B[0-9A-Z]{9}/) || [])[0] ?? ''; // Common
     if (!/^B[0-9A-Z]{9}$/.test(asin)) return;
     
     //// get the price and the point back from this page
-    const pinfo = extract_price_and_point(document.querySelector('#MediaMatrix'));
-
+    //const pinfo = extract_price_and_point(document.querySelector('#MediaMatrix'));
+    const pinfo = extract_price_and_point(
+        //document.querySelector('#mediamatrix_feature_div')
+        document.querySelector('#mediamatrix_feature_div .selected')
+    );
+    
     // call kiseppe 1.0 (kiseppe1.0::main() => insert_price_graph())
     insert_price_graph(asin, pinfo);
     if (storage_items?.opt_asin_page_only) return;
+
+    // put price graph button (since 2023/12)
+    const te = document.querySelector('h1#title'); // PC page
+    const btn = build_price_graph_dialog(asin, te?.textContent, pinfo);
+    if (te && btn) {
+        btn.style.position = 'relative';
+        btn.style.fontSize = '1rem';
+        //te.insertBefore(btn, te.firstChild);
+        te.appendChild(btn);
+    }
 
     // get series ASIN
     const [srasin, c] = get_series_asin(document.body);
@@ -346,18 +396,19 @@ async function wishlist_page() {
     // collect ASINs for API access and put price graph buttons
     const a2pinfo = {};
     const asins = [];
-    //document.querySelectorAll('li[data-itemid]')
-    //[...document.querySelectorAll('li[data-itemid]')].map(e => e.querySelector('.g-itemImage'))
-    document.querySelectorAll('li[data-itemid]').forEach(cntn => {
+    // PC page: ul#g-items > li
+    // SP page: ul#awl-list-items > li
+    document.querySelectorAll('ul#g-items > li, ul#awl-list-items > li').forEach(cntn => {
         if (cntn.querySelector('.kiseppe-pg-btn')) return;
-        const ic = cntn.querySelector('.g-itemImage');
-        if (!ic) return;
         if (!/Kindle版/.test(cntn.textContent)) return;
 
-        const asin = get_asin_in_href(ic.querySelector('a'));
+        const asin = //get_asin_in_href(ic.querySelector('a'));
+              cntn.querySelector('div[data-csa-c-item-id]').dataset.csaCItemId;
+
         asins.push(asin);
         cntn.dataset.asin = asin;
-        const item_title = ic.querySelector('a')?.getAttribute('title');
+        //const item_title = ic.querySelector('a')?.getAttribute('title');
+        const item_title = cntn.querySelector('img[height]')?.getAttribute('alt');
         a2pinfo[asin] = extract_price_and_point(cntn);
         put_price_graph_button(cntn, asin, item_title, a2pinfo[asin]);
     });
@@ -812,15 +863,21 @@ function extract_price_and_point(e) {
     let point;
 
     try {
-        const elms = [...e.querySelectorAll('.selected')];
-        const html =  (elms.length ? elms : [e]).map(n => n.innerHTML).join(' ');
+        //const elms = [...e.querySelectorAll('.selected')];
+        //const html =  (elms.length ? elms : [e]).map(n => n.innerHTML).join(' ');
+        //const elm = e.querySelector('.selected');
+        //const html =  elm?.innerHTML || '';
+        const html =  e?.innerHTML || '';
         const s = html.replace(/(<style>.+?<\/style>|<[^>]+>|\s)+/gs, ' ');
         console_log("ext:", s);
 
         let r = s.match(/￥\s*\d{1,3}(,\d{3})*/g);
         if (r) {
             r = r.map(m => m.replace(/\D+/g, ''));
-            if (s.match(/[Uu]nlimited/)) { // KU のときは 0 円以外の金額(MAX)を選択
+            if (
+                s.match(/[Uu]nlimited|または/)
+                //elm.querySelector('.a-icon-kindle-unlimited')
+            ) { // KU のときは 0 円以外の金額(MAX)を選択
                 price = Math.max(...r);
                 console_log('KU Yen', price, r);
             } else {
@@ -828,7 +885,7 @@ function extract_price_and_point(e) {
                 console_log('Yen', price, r);
             }
         }
-
+        
         if (r = s.match(/(\d+)(ポイント|pt)/)) {
             point = r[1];
             console_log('pt', r[0]);
@@ -1028,7 +1085,7 @@ function build_price_graph_dialog(asin, title, pinfo={}) {
         // <div id="pg_container">
         //   <div class="pg_item_info">
         //     <div class="pg_item_title">${title}</div>
-        //     <iframe src="${url}" scrolling="no"></iframe>
+        //     <iframe id="kiseppe" src="${url}" scrolling="no"></iframe>
         //   </div>
         //   <button onclick="document.getElementById('popup_modal').close()">Close</button>
         // </div>
@@ -1040,6 +1097,7 @@ function build_price_graph_dialog(asin, title, pinfo={}) {
         pgItemTitle.className = 'pg_item_title';
         pgItemTitle.textContent = title;
         const iframe = document.createElement('iframe');
+        iframe.id = 'kiseppe';
         iframe.src = url;
         iframe.scrolling = 'no';
         const closeButton = document.createElement('button');
@@ -1060,13 +1118,23 @@ function build_price_graph_dialog(asin, title, pinfo={}) {
     return pgb;
 }
 
+
+//// get hight of price graph for iframe
+window.addEventListener('message', function(e) {
+    const iframe = document.getElementById("kiseppe");
+    if (! iframe) return;
+    //console.log('e.data', e.data);
+    if (e.data[0] === 'setHeight')
+        iframe.style.height = e.data[1] + "px";
+}, false);
+
 // Insert a Price Graph iframe in an ASIN page (based on kiseppe 1.0's main())
 function insert_price_graph(asin, pinfo) {
     console_log('kiseppe: insert price graph', asin);
 
     if (document.getElementById('kiseppe')) return false;
 
-    //// get hight of iframe (use it later)
+/*    //// get hight of iframe (use it later)
     window.addEventListener('message', function(e) {
         const iframe = document.getElementById("kiseppe");
         switch(e.data[0]) { // event name
@@ -1075,6 +1143,7 @@ function insert_price_graph(asin, pinfo) {
             break;
         }
     }, false);
+*/
 
     //// build API url (returns a web page for iframe)
     // To put the today's point on the graph, API needs price and point.
@@ -1092,7 +1161,12 @@ function insert_price_graph(asin, pinfo) {
     new_elm.appendChild(im);
 
     // insert iframe
-    const base_elm = document.getElementById('ATFCriticalFeaturesDataContainer');
+    // PC page: #ATFCriticalFeaturesDataContainer
+    // SP page: #Northstar-Buybox-MobileWeb_feature_div
+    const base_elm =
+          document.querySelector('#ATFCriticalFeaturesDataContainer, ' +
+                                 '#Northstar-Buybox-MobileWeb_feature_div');
+    //const base_elm = document.getElementById('ATFCriticalFeaturesDataContainer');
     if (!base_elm) {
         console.error('ATFCriticalFeaturesDataContainer not found');
         return false;

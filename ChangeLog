@@ -1,3 +1,29 @@
+2023-12-25  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	window.addEventListener('message', function(e) { ... })
+	を insert_price_graph() から外に出した。
+	insert_price_graph() 以外からも使うため。
+
+2023-12-17  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	スマホ表示 (SP page) への対応に着手。
+	ほしい物リスト、ASIN ページを対応させた。
+	ついでに、ページ種類判定部分、ページ処理部分も直す。
+
+2023-12-10  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	経緯:
+	個別作品ページでの価格表示部分のレイアウトが変更されていた。右カラムにまとめて表示されるようになった。そのため、個別作品ページで、今表示されている価格と還元ポイントが取得できず、価格推移グラフに最新値としての反映ができない。
+	対応策は、content-script.js の extract_price_and_point() かその呼び出し元の修正。現在は try-catch 内でエラー発生するのみで kiseppe の動作には影響はない。
+
+	実装:
+	kindle_asin_page() で
+	extract_price_and_point() を呼び出すときに渡すエレメントを変更。
+	kindleunlimited の "￥0" をとってしまう問題もあったが、解決。
+
 2023-12-07  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js: retrun => return (はずかしいタイポ)
