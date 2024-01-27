@@ -364,7 +364,6 @@ async function kindle_asin_page() {
     if (te && btn) {
         btn.style.position = 'relative';
         btn.style.fontSize = '1rem';
-        //te.insertBefore(btn, te.firstChild);
         te.appendChild(btn);
     }
 
