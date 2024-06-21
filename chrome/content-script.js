@@ -93,7 +93,7 @@ async function main() {
     //chk += document.querySelector('#nav-subnav .nav-a-content')?.textContent;
     let chk = document.querySelector('#nav-subnav a[aria-label]')?.textContent;
     //chk += document.querySelector('#manga-mobile-subnav a[aria-label]')?.textContent;
-    if (/Kindle/.test(chk)) ok_flag = 1;
+    if (/Kindle|Fliptoon/.test(chk)) ok_flag = 1;
 
     if (document.querySelector('#tmm-grid-swatch-KINDLE,#tmm-grid-swatch-OTHER')?.classList.contains('selected')) {
         // ASIN page 判定 (PC/SP 共通)

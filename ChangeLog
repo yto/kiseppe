@@ -1,3 +1,25 @@
+2024-06-21  Tatsuwo  <yto at example.com>
+
+	* firefox/content-script.js:
+	chrome と同じ
+
+	* chrome/content-script.js:
+	シリーズページで、
+	Kindle 関連ページの判定方法
+	（上のメニューバーの一番左に "Kindle" があるかどうか）
+	が機能しなくなっていた。
+	メニューバーに「amazon manga」が表示されるようになった影響。
+	メニューバーに "Fliptoon" が含まれればOKにするようにした。
+
+	* firefox/manifest.json: v2.0.6
+
+	* chrome/manifest.json: v2.0.6
+
+	* memo: 今日から v2.0.6 の作業を開始する
+	- シリーズページで機能しなくなったので調査＆対応
+
+	* memo: v2.0.5 公式公開(1月にやるのを忘れていた模様)
+
 2024-01-26  Tatsuwo  <yto at example.com>
 
 	* chrome/kiseppe.css:
