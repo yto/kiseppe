@@ -735,8 +735,9 @@ async function kindle_search_page() {
         if (sr_jsdr >= JSDR_CUTOFF) show_series_sale_badge(seri);
         const jsdr = get_jsdr(asin, res, a2pinfo);
         if (jsdr < JSDR_CUTOFF) return;
-        const x = cntn.querySelector('img').closest('.puisg-col-inner');
-        show_jsdr_badge(x, jsdr, "4px", "0");
+        let x = cntn.querySelector('img').closest('.puisg-col-inner');
+	if (!x) x = cntn.querySelector('img').closest('.sg-col-inner');
+	show_jsdr_badge(x, jsdr, "4px", "0")
         const c = cntn.querySelector('div[cel_widget_id]');
         change_background_color(c, jsdr);
         const b = cntn.querySelector('div[class*="-badge-container"]');

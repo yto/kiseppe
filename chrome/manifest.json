@@ -1,7 +1,7 @@
 {
     "name": "Kiseppe - Price Chart for Amazon Japan Kindle",
     "description": "Displays price trends, discounts, and summary links for sales on Amazon Japan's Kindle pages. Only operates on www.amazon.co.jp.",
-    "version": "2.0.6",
+    "version": "2.0.7-alpha",
     "homepage_url": "https://yapi.ta2o.net/kndlsl/kiseppe/",
     "manifest_version": 3,
     "icons": {

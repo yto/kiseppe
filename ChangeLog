@@ -1,3 +1,24 @@
+2024-06-29  Tatsuwo  <yto at example.com>
+
+	* firefox/manifest.json: v2.0.7-alpha
+
+	* chrome/manifest.json: v2.0.7-alpha
+
+	* firefox/content-script.js:
+	chrome と同様
+
+	* chrome/content-script.js:
+	一部の環境で、
+	Kindle 書籍の検索結果表示が、
+	1行1作品の横長カード表示から、
+	1行複数作品の縦長ボックス表示になったみたい。
+	今後全部このレイアウトになるのかもしれない。
+	まだ場合によっては前のレイアウトが出ることもある。
+	このレイアウト変更により、
+	Kiseppe による実質割引率の表示バッジが出なくなった。
+	旧レイアウトの処理は残したままで、
+	新レイアウトにも対応するように修正。
+
 2024-06-22  Tatsuwo  <yto at example.com>
 
 	* memo: v2.0.6 公式公開
