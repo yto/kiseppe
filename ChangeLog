@@ -1,8 +1,10 @@
+2024-07-01  Tatsuwo  <yto at example.com>
+
+	* firefox/manifest.json: v2.0.6.9
+
+	* chrome/manifest.json: v2.0.6.9
+
 2024-06-29  Tatsuwo  <yto at example.com>
-
-	* firefox/manifest.json: v2.0.7-alpha
-
-	* chrome/manifest.json: v2.0.7-alpha
 
 	* firefox/content-script.js:
 	chrome と同様
