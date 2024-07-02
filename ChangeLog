@@ -1,5 +1,9 @@
 2024-07-02  Tatsuwo  <yto at example.com>
 
+	* memo: v2.0.7 公式公開
+	- github で Release
+	- chrome firefox 審査通ったのは 7/2
+
 	* firefox/manifest.json: v2.0.7
 
 	* chrome/manifest.json: v2.0.7
