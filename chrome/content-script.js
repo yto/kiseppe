@@ -168,8 +168,8 @@ async function main() {
 
         await wishlist_page();
 
-        const e = document.querySelector('ul#g-items, ul#awl-list-items');
-        // PC page: ul#g-items / SP page: ul#awl-list-items
+        const e = document.querySelector('div#wl-item-view, ul#awl-list-items');
+        // PC page: ul#g-items=>div#... / SP page: ul#awl-list-items
         console.assert(e);
         if (!e) return;
         const callback = generate_callback(e, wishlist_page);
@@ -401,8 +401,10 @@ async function wishlist_page() {
         if (cntn.querySelector('.kiseppe-pg-btn')) return;
         if (!/Kindle版/.test(cntn.textContent)) return;
 
-        const asin = //get_asin_in_href(ic.querySelector('a'));
-              cntn.querySelector('div[data-csa-c-item-id]').dataset.csaCItemId;
+        const di = cntn.querySelector('div[data-csa-c-item-id]');
+        if (!di) return;
+        const asin = di.dataset.csaCItemId;
+        if (!asin.startsWith("B")) return;
 
         asins.push(asin);
         cntn.dataset.asin = asin;
@@ -518,8 +520,8 @@ async function kindle_octopus_component() {
     const a2pinfo = {};
     const aslist = [];
     const calist = [];
-    e.querySelectorAll("h2 a[href]").forEach(e => {
-        const asin = get_asin_in_href(e);
+    e.querySelectorAll("a[href] > h2").forEach(e => {
+        const asin = get_asin_in_href(e.parentNode);
         if (!asin) return;
         const cntn = e.closest('div[class*="s-card-container"]');
         if (cntn.querySelector('.kiseppe-pg-btn')) return;
@@ -538,7 +540,7 @@ async function kindle_octopus_component() {
     
     // display jsdr information
     Object.keys(res?.result?.books || []).forEach(asin => {
-        const e = document.querySelector(`h2 a[href*="/dp/${asin}"]`);
+        const e = document.querySelector(`a[href*="/dp/${asin}"] > h2`);
         if (!e) return;
         //console_log('kiseppe: octopus-component', asin);
         const cntn = e.closest('div[class*="s-card-container"]');
@@ -736,8 +738,8 @@ async function kindle_search_page() {
         const jsdr = get_jsdr(asin, res, a2pinfo);
         if (jsdr < JSDR_CUTOFF) return;
         let x = cntn.querySelector('img').closest('.puisg-col-inner');
-	if (!x) x = cntn.querySelector('img').closest('.sg-col-inner');
-	show_jsdr_badge(x, jsdr, "4px", "0")
+        if (!x) x = cntn.querySelector('img').closest('.sg-col-inner');
+        show_jsdr_badge(x, jsdr, "4px", "0");
         const c = cntn.querySelector('div[cel_widget_id]');
         change_background_color(c, jsdr);
         const b = cntn.querySelector('div[class*="-badge-container"]');
@@ -777,10 +779,12 @@ async function kindle_carousel_component() {
     // ASIN page: %2Fdp%2FB00JGI56B0%2F
     // キンドルトップ横スクロール表示
     // Ex. https://www.amazon.co.jp/s?node=2275256051
+    // Ex. https://www.amazon.co.jp/kindle-dbs/storefront
     // 横並びだけどスクロールしないやつ
     // Ex. https://www.amazon.co.jp/b?node=2292699051
     const qs_carousel =
           'div[class*="a-carousel-row-inner"], ' +
+          //'div[id^="unified-ebooks-storefront-"], ' +
           'div[class*="octopus-pc-card-content"]'
     document.querySelectorAll(qs_carousel).forEach(ca => {
         if (ca.querySelector('img[alt="likes icon"]'))
@@ -878,7 +882,9 @@ function extract_price_and_point(e) {
                 s.match(/[Uu]nlimited|または/)
                 //elm.querySelector('.a-icon-kindle-unlimited')
             ) { // KU のときは 0 円以外の金額(MAX)を選択
-                price = Math.max(...r);
+                // 0 円しかないときは price は undefined のままに
+                const max_price = Math.max(...r);
+                if (max_price > 0) price = max_price;
                 console_log('KU Yen', price, r);
             } else {
                 price = r[0];
@@ -1033,6 +1039,8 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
     b.appendChild(document.createElement('br'));
     b.appendChild(document.createTextNode('オフ'));
     
+    b.title = '購入前に必ず公式情報をご確認ください';
+
     const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
     const rgb = hex2rgb(color_hex).map(v => Math.round(v/1.5)).join(',');
     b.style.backgroundColor = `rgba(${rgb})`;

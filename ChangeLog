@@ -1,3 +1,31 @@
+2024-12-24  Tatsuwo  <yto at example.com>
+
+	* firefox/manifest.json: v2.0.8
+
+	* chrome/manifest.json: v2.0.8
+
+	* firefox/content-script.js:
+	chrome のをコピー
+
+	* chrome/content-script.js:
+	「購入前に必ず公式情報をご確認ください」という旨のTIPSを追加
+
+2024-12-23  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	検索結果ページで kindleunlimited の作品が 0 円扱い（100%オフ）表示になってしまう不具合。
+	検索結果ページに KU 作品の価格が表示されなくなったのが原因。
+	もともとこのような場合にはAPIの結果だけを表示する方針だったが、コードが意図通りではなかった。
+	price を undefined にするようにコードを修正。
+
+2024-12-22  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	- Octopus Component: 処理が機能しなくなっていた → 修正
+	- Wishlist: observer が機能していない → 修正
+	- [断念] Wishlist: グリッド表示でボタン等出ない → Kindleか否かの判定できず
+	- [断念] TOP: キンドルトップページのカルーセルへの対応 → shadow-root...
+
 2024-07-02  Tatsuwo  <yto at example.com>
 
 	* memo: v2.0.7 公式公開
