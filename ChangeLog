@@ -1,5 +1,10 @@
 2024-12-24  Tatsuwo  <yto at example.com>
 
+	* memo: v2.0.8 公式公開
+	- github で Release
+	- chrome の審査通ったのは 12/25
+	- firefox 審査通ったのは 12/24
+
 	* firefox/manifest.json: v2.0.8
 
 	* chrome/manifest.json: v2.0.8
