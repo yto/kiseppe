@@ -424,7 +424,7 @@ async function wishlist_page() {
         const cntn = document.querySelector(`li[data-asin=${asin}]`);
         const jsdr = get_jsdr(asin, res, a2pinfo);
         if (jsdr < JSDR_CUTOFF) return;
-        const ca = cntn.querySelector('.g-itemImage');
+        const ca = cntn.querySelector('[id^=itemImage]');
         show_jsdr_badge(ca, jsdr, "0", "0");
         change_background_color(cntn, jsdr);
     });
@@ -1044,7 +1044,6 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
     const color_hex =  (storage_items?.opt_bgcolor_hex) || '#FF0000';
     const rgb = hex2rgb(color_hex).map(v => Math.round(v/1.5)).join(',');
     b.style.backgroundColor = `rgba(${rgb})`;
-    e.style.position = "relative";
     e.appendChild(b);
     return true;
 }
