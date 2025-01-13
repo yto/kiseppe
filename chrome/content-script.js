@@ -395,23 +395,37 @@ async function wishlist_page() {
     // collect ASINs for API access and put price graph buttons
     const a2pinfo = {};
     const asins = [];
-    // PC page: ul#g-items > li
+    // PC page (list): ul#g-items > li
+    // PC page (grid): ul#g-items-grid > li
     // SP page: ul#awl-list-items > li
-    document.querySelectorAll('ul#g-items > li, ul#awl-list-items > li').forEach(cntn => {
+    document.querySelectorAll('ul#g-items > li, ul#g-items-grid > li, ul#awl-list-items > li').forEach(cntn => {
         if (cntn.querySelector('.kiseppe-pg-btn')) return;
-        if (!/Kindle版/.test(cntn.textContent)) return;
+        if (!/Kindle版/.test(cntn.textContent) &&
+            !/1-Clickで今すぐ買う/.test(cntn.textContent)) return;
 
+        let asin = '';
+        let item_title = '';
         const di = cntn.querySelector('div[data-csa-c-item-id]');
-        if (!di) return;
-        const asin = di.dataset.csaCItemId;
-        if (!asin.startsWith("B")) return;
-
+        if (di) { // list
+            asin = di.dataset.csaCItemId;
+            if (!asin.startsWith("B")) return;
+            item_title = cntn.querySelector('img[height]')?.getAttribute('alt');
+            a2pinfo[asin] = extract_price_and_point(cntn);
+            put_price_graph_button(cntn, asin, item_title, a2pinfo[asin]);
+        } else { // grid
+            const firstLink = cntn.querySelector('a');
+            if (!firstLink) return;
+            const regex = /\/dp\/(B[0-9A-Z]{9})\//;
+            const match = firstLink.href.match(regex);
+            if (!match) return;
+            asin = match[1];
+            item_title = firstLink.title;
+            a2pinfo[asin] = extract_price_and_point(cntn);
+            const c = cntn.querySelector('.wl-grid-item-selectable')
+            put_price_graph_button(c, asin, item_title, a2pinfo[asin]);
+        }
         asins.push(asin);
         cntn.dataset.asin = asin;
-        //const item_title = ic.querySelector('a')?.getAttribute('title');
-        const item_title = cntn.querySelector('img[height]')?.getAttribute('alt');
-        a2pinfo[asin] = extract_price_and_point(cntn);
-        put_price_graph_button(cntn, asin, item_title, a2pinfo[asin]);
     });
     if (asins.length <= 0) return;
     const asins_pp = add_priceinfo_to_asinlist(asins, a2pinfo);
@@ -424,9 +438,16 @@ async function wishlist_page() {
         const cntn = document.querySelector(`li[data-asin=${asin}]`);
         const jsdr = get_jsdr(asin, res, a2pinfo);
         if (jsdr < JSDR_CUTOFF) return;
-        const ca = cntn.querySelector('[id^=itemImage]');
-        show_jsdr_badge(ca, jsdr, "0", "0");
-        change_background_color(cntn, jsdr);
+        let ca = cntn.querySelector('[id^=itemImage]');
+        if (ca) { // list
+            show_jsdr_badge(ca, jsdr, "0", "0");
+            change_background_color(cntn, jsdr);
+        } else { // grid
+            ca = cntn.querySelector('.wl-grid-item-middle-section');
+            if (!ca) return;
+            show_jsdr_badge(ca, jsdr, "1", "0");
+            change_background_color(ca, jsdr);
+        }
     });
 
     return;

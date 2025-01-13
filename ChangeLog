@@ -1,3 +1,16 @@
+2025-01-13  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	ウィッシュリストのグリッド表示でバッジ・ボタン・背景色を出せるようにした。
+	結構強引なやり方なのでアマゾン側でのちょっとしたレイアウト変更で影響受ける可能性大。
+
+	* memo: プルリク。マージ。
+	Foo-x さん、ありがとうございます。
+
+	fix: to show wishlist discount rate badge by Foo-x · Pull Request #4 · yto/kiseppe
+	https://github.com/yto/kiseppe/pull/4
+	> ウィッシュリストの仕様変更により割引率が表示されなくなった問題を修正しました。
+
 2024-12-24  Tatsuwo  <yto at example.com>
 
 	* memo: v2.0.8 公式公開
