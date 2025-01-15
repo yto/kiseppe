@@ -1,3 +1,10 @@
+2025-01-14  Tatsuwo  <yto at example.com>
+
+	* memo: v2.0.9 公式公開
+	- github で Release (1/14)
+	- chrome の審査通ったのは 1/15
+	- firefox 審査通ったのは 1/14
+
 2025-01-13  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js:
