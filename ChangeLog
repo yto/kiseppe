@@ -1,3 +1,16 @@
+2025-01-16  Tatsuwo  <yto at example.com>
+
+	* chrome/options.html (Options):
+	項目「カルーセルへの処理を行う」をDEBUG用設定からメイン設定へ格上げ。
+	項目「価格推移グラフの表示のみ」をDEBUG用設定に格下げ。
+
+	* chrome/content-script.js:
+	kindle_asin_page():
+	ASINページ（個別作品ページ）でバッジが出なくなっていたので修正。
+	kindle_shadowroot_carousel_component():
+	storefront ページの shadowRoot のカルーセルにボタンを出すようにした。
+	（動作にはオプションでの設定必要）
+
 2025-01-14  Tatsuwo  <yto at example.com>
 
 	* memo: v2.0.9 公式公開

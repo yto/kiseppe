@@ -28,6 +28,9 @@
 //   - Kindle Carousel Component
 //   - Kindle Grid12 Component
 //     - observe
+// - Kindle Store Front Page
+//   - Kindle shadowRoot Carousel Component
+//     - observe
 // - Kindle Manga Store Page
 //   - Kindle Carousel Component
 //     - observe
@@ -52,6 +55,9 @@
 //   - General Carousel
 //     - [price-graph-button]
 //   - Manga Store Ranking Carousel
+//     - [price-graph-button]
+// - Kindle shadowRoot Carousel Component
+//   - Kindle Store Front Page
 //     - [price-graph-button]
 //
 // Words
@@ -295,6 +301,19 @@ async function main() {
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
 
+    } else if (/kindle-dbs\/storefront/.test(location.href)) {
+
+        console_log("kiseppe: here is Kindle Store Front Page");
+
+        if (!PROCESS_ON_CAROUSEL) return;
+        await kindle_shadowroot_carousel_component();
+
+        const e = document.querySelector('html');
+        console.assert(e);
+        const callback = generate_callback(e, kindle_shadowroot_carousel_component);
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
+
     } else if (/manga-store/.test(location.href)) {
 
         console_log("kiseppe: here is Kindle Manga Store Page");
@@ -382,8 +401,9 @@ async function kindle_asin_page() {
     const jsdr = get_jsdr(asin, res, {asin: pinfo});
     if (jsdr < JSDR_CUTOFF) return;
     const x = document.querySelector('#leftCol'); // '#imageBlock'
-    show_jsdr_badge(x, jsdr, "0", "0");
     change_background_color(x, jsdr, 'g');
+    const x2 = x.querySelector('div#imageBlock .a-fixed-left-grid');
+    show_jsdr_badge(x2, jsdr, "0", "0");
 
     return;
 }
@@ -800,12 +820,10 @@ async function kindle_carousel_component() {
     // ASIN page: %2Fdp%2FB00JGI56B0%2F
     // キンドルトップ横スクロール表示
     // Ex. https://www.amazon.co.jp/s?node=2275256051
-    // Ex. https://www.amazon.co.jp/kindle-dbs/storefront
     // 横並びだけどスクロールしないやつ
     // Ex. https://www.amazon.co.jp/b?node=2292699051
     const qs_carousel =
           'div[class*="a-carousel-row-inner"], ' +
-          //'div[id^="unified-ebooks-storefront-"], ' +
           'div[class*="octopus-pc-card-content"]'
     document.querySelectorAll(qs_carousel).forEach(ca => {
         if (ca.querySelector('img[alt="likes icon"]'))
@@ -838,6 +856,48 @@ async function kindle_carousel_component() {
     });
 
     return;
+}
+
+//// Kindle shadowRoot Carousel Component
+async function kindle_shadowroot_carousel_component() {
+
+    // Kindle Store Front Page
+    // Ex. https://www.amazon.co.jp/kindle-dbs/storefront
+    if (/kindle-dbs\/storefront/.test(location.href)) {
+        console_log('kiseppe: > storefront carousel');
+        
+        console_log("wait a few seconds");
+        await sleep(1000);
+        console_log("ok, go!");
+
+        //const qs_cs = 'div[id^="unified-ebooks-storefront-default_"]';
+        const qs_cs = 'div.celwidget';
+        document.querySelectorAll(qs_cs).forEach(ca => {
+            //console.log('ca',ca);
+            const e = ca.querySelector('bds-render-context-provider');
+            if (!e) return;
+            const slot = e.shadowRoot.querySelector('slot');
+            const assignedNodes = slot.assignedNodes({flatten: true});
+            //console.log('assignedNodes',assignedNodes);
+            assignedNodes[0].querySelectorAll('li').forEach(li => {
+                //console.log(li);
+                const e2 = li.querySelector('bds-unified-book-faceout');
+                if (!e2) return;//{console.log('no e2',li); return;}
+                const bi = e2.shadowRoot.querySelector('div.ubf-book-info');
+                if (!bi) return;//{console.log('no bi',e2); return;}
+                const at = bi.querySelector('a');
+                if (!at) return;//{console.log('no at',bi); return;}
+                const asin = get_asin_in_href(at);
+                const item_title = at.querySelector('bds-book-cover-image').getAttribute('coverimagealttext');
+                const pinfo = {'price':undefined, 'point':undefined};
+                //console.log(bi, asin, item_title, pinfo);
+                
+                put_price_graph_button(li, asin, item_title, pinfo);
+            });
+        });
+
+        return;
+    }
 }
 
 
@@ -1016,6 +1076,7 @@ function add_priceinfo_to_asinlist(asinlist, a2pinfo) {
 // put a price graph button
 function put_price_graph_button(e, asin, title, pinfo={}) {
     if (!e || !title) return false;
+    if (/📈/.test(e.innerText)) return;
     const pgd = build_price_graph_dialog(asin, title, pinfo);
     e.style.position = "relative";
     e.appendChild(pgd);
