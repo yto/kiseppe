@@ -793,12 +793,16 @@ async function kindle_search_page() {
 //// Kindle Carousel Component
 async function kindle_carousel_component() {
 
+    const a2pinfo = {};
+    const asinss = [];
+
     //// manga store ranking carousel
     // マンガストアトップ ランキング横スクロール表示
     // Ex. https://www.amazon.co.jp/kindle-dbs/manga-store/
     const qs_rk = 'div[class^="_manga-genre-ranking-card_style_grid-container"]';
     if (document.querySelector(qs_rk)) {
         console_log('kiseppe: > manga-store ranking area');
+        const asins = [];
         const ca = document.querySelector(qs_rk);
         ca.querySelectorAll(
             'a[href*="/dp/B"] img[class*="_manga-genre-ranking-card_retail-item-style_book-cover"]'
@@ -811,15 +815,17 @@ async function kindle_carousel_component() {
             const asin = get_asin_in_href(e.closest('a'));
             const item_title = e.getAttribute('alt')
             const pinfo = extract_price_and_point(cntn);
+            a2pinfo[asin] = pinfo;
+            asins.push(asin);
+            cntn.dataset.asin = asin;
             put_price_graph_button(cntn, asin, item_title, pinfo);
         });
+        if (asins.length > 0) asinss.push(asins);
     }
 
     //// general carousel
     // カテゴリTOP: div[class*="octopus-pc-card-content"]
     // ASIN page: %2Fdp%2FB00JGI56B0%2F
-    // キンドルトップ横スクロール表示
-    // Ex. https://www.amazon.co.jp/s?node=2275256051
     // 横並びだけどスクロールしないやつ
     // Ex. https://www.amazon.co.jp/b?node=2292699051
     const qs_carousel =
@@ -833,16 +839,17 @@ async function kindle_carousel_component() {
         if (ca.querySelector('[class*="a-icon-prime"]'))
             return; // ASIN page non-kindle-books
         console_log('kiseppe: > general carousel');
+        const asins = [];
         ca.querySelectorAll(
             'li a[href*="/dp/B"] img[alt], ' +
                 'li a[href^="/gp/product/B"] img[alt], ' + 
                 'li a[href*="%2Fdp%2FB"] img[alt]'
         ).forEach(e => {
-            if (e.querySelector('.kiseppe-pg-btn'))
-                return; // button already exists
             if (/image-ku/.test(e.getAttribute('src'))) return;
             let cntn = e.closest('div[class^="_manga-store-shoveler_style_item-row-"]'); // two rows
             if (!cntn) cntn = e.closest('li');
+            if (cntn.querySelector('.kiseppe-pg-btn'))
+                return; // button already exists
             if (/banner-/.test(cntn.getAttribute("class")))
                 return; // manga-store big banner            
             if (cntn.querySelector('[data-endtime]'))
@@ -851,9 +858,39 @@ async function kindle_carousel_component() {
             const asin = get_asin_in_href(e.closest('a'));
             const item_title = e.getAttribute('alt')
             const pinfo = extract_price_and_point(cntn);
+            a2pinfo[asin] = pinfo;
+            asins.push(asin);
+            cntn.dataset.asin = asin;
             put_price_graph_button(cntn, asin, item_title, pinfo);
         });
+        if (asins.length > 0) asinss.push(asins);
     });
+
+    for (const i in asinss) {
+        const asins = asinss[i];
+
+        // API access
+        const res = await access_api_params(asins.join(","));
+
+        // display jsdr information
+        Object.keys(res?.result?.books || []).forEach(asin => {
+            const jsdr = get_jsdr(asin, res, a2pinfo);
+            if (jsdr < JSDR_CUTOFF) return;
+            let cs = document.querySelectorAll(`[data-asin="${asin}"]`);
+            cs.forEach(cntn => {
+                let c = cntn.querySelector('.octopus-pc-asin-info-section');
+                if (c) {
+                    change_background_color(c, jsdr);
+                    show_jsdr_badge(cntn, jsdr, "2px", "0");
+                    return;
+                }
+                show_jsdr_badge(cntn, jsdr, "0", "0");
+                change_background_color(cntn, jsdr);
+            });
+        });
+
+        await sleep(700);
+    }
 
     return;
 }
@@ -872,6 +909,8 @@ async function kindle_shadowroot_carousel_component() {
 
         //const qs_cs = 'div[id^="unified-ebooks-storefront-default_"]';
         const qs_cs = 'div.celwidget';
+        const a2pinfo = {};
+        const asinss = [];
         document.querySelectorAll(qs_cs).forEach(ca => {
             //console.log('ca',ca);
             const e = ca.querySelector('bds-render-context-provider');
@@ -879,7 +918,10 @@ async function kindle_shadowroot_carousel_component() {
             const slot = e.shadowRoot.querySelector('slot');
             const assignedNodes = slot.assignedNodes({flatten: true});
             //console.log('assignedNodes',assignedNodes);
+            const asins = [];
             assignedNodes[0].querySelectorAll('li').forEach(li => {
+                if (li.querySelector('.kiseppe-pg-btn'))
+                    return; // button already exists
                 //console.log(li);
                 const e2 = li.querySelector('bds-unified-book-faceout');
                 if (!e2) return;//{console.log('no e2',li); return;}
@@ -890,11 +932,35 @@ async function kindle_shadowroot_carousel_component() {
                 const asin = get_asin_in_href(at);
                 const item_title = at.querySelector('bds-book-cover-image').getAttribute('coverimagealttext');
                 const pinfo = {'price':undefined, 'point':undefined};
+                a2pinfo[asin] = pinfo;
                 //console.log(bi, asin, item_title, pinfo);
+                asins.push(asin);
+                li.dataset.asin = asin;
                 
                 put_price_graph_button(li, asin, item_title, pinfo);
             });
+            if (asins.length > 0) asinss.push(asins);
         });
+
+        for (const i in asinss) {
+            const asins = asinss[i];
+
+            // API access
+            const res = await access_api_params(asins.join(","));
+
+            // display jsdr information
+            Object.keys(res?.result?.books || []).forEach(asin => {
+                const jsdr = get_jsdr(asin, res, a2pinfo);
+                if (jsdr < JSDR_CUTOFF) return;
+                const cs = document.querySelectorAll(`[data-asin="${asin}"]`);
+                cs.forEach(cntn => {
+                    show_jsdr_badge(cntn, jsdr, "0", "0");
+                    change_background_color(cntn, jsdr);
+                });
+            });
+
+            await sleep(700);
+        }
 
         return;
     }
@@ -1076,7 +1142,6 @@ function add_priceinfo_to_asinlist(asinlist, a2pinfo) {
 // put a price graph button
 function put_price_graph_button(e, asin, title, pinfo={}) {
     if (!e || !title) return false;
-    if (/📈/.test(e.innerText)) return;
     const pgd = build_price_graph_dialog(asin, title, pinfo);
     e.style.position = "relative";
     e.appendChild(pgd);

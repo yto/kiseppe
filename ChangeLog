@@ -1,3 +1,10 @@
+2025-01-19  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	カルーセルにバッジ・背景色を表示するようにした。
+	なお、ボタンはこれまで表示されていたので、追加でバッジと背景色。
+	動作にはオプションでの設定必要。
+
 2025-01-16  Tatsuwo  <yto at example.com>
 
 	* chrome/options.html (Options):
