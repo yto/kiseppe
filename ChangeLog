@@ -1,3 +1,19 @@
+2025-01-23  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	著者ページ(Author Page)のレイアウト変更に対応
+
+	* chrome/options.js:
+	コード調整
+
+	* chrome/kiseppe.css:
+	UI調整
+
+2025-01-22  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	コード調整（最適化など）
+
 2025-01-19  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js:

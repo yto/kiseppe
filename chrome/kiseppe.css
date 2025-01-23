@@ -31,7 +31,7 @@
     font-size: x-small;
     background-color: rgba(255,0,0,0.9); /* brown */
     color: white;
-    /* animation: araware 1.5s; */
+    animation: araware 1.0s;
 }
 .kiseppe-series-sale-badge {
     color: red; /* only for Windows Chrome */
@@ -43,7 +43,7 @@
     position: absolute;
     bottom: 0;
     left: 0;
-    z-index: 1;
+    z-index: 100;
     cursor: pointer;
     font-size: 1em;
     color: rgba(0,0,0,0.9);
@@ -56,6 +56,14 @@
 dialog#popup_modal {
     border: none;
     border-radius: 8px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    max-height: 90vh; /* 画面の90%の高さまで */
+    overflow-y: auto; /* 高さを超えた場合にスクロール */
+    min-width: 300px;
 }
 dialog#popup_modal::backdrop {
     background: rgba(0,0,0,.5);
@@ -76,10 +84,21 @@ dialog#popup_modal::backdrop {
     overflow: hidden;
     white-space: nowrap;
 }
+#popup_modal #pg_container .pg_button_close {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    fontSize: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    position: absolute;
+    top: 7px;
+    right: 7px;
+}
 #popup_modal #pg_container iframe {
     width: 100%;
     height: 100%;
     border: 0;
     overflow: visible;
 }
-

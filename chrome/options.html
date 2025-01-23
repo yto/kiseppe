@@ -7,10 +7,12 @@
       body { padding: 0; margin: 0; font-size: 0.9rem; }
       main { min-width: 500px; }
       #debug-setting { border-left: dashed 1px #808080; }
-      h1, label, button, details, #cr { display: block; margin: 1rem 0.9rem; }
+      h1, button, details, #cr { display: block; margin: 1rem 0.9rem; }
       #cr { text-align: right; }
       hr { border: none; border-top: dashed 1px #808080; }
       #notice { color: darkred; font-size: 0.7rem; margin: 0 1rem; }
+      label { display: flex; align-items: center; margin: 1rem 0.9rem; }
+      input[type=number] { width: 3rem; }
     </style>
   </head>
   <body>
@@ -29,7 +31,7 @@
           カルーセルへの処理を行う
         </label>
         <label>
-          <input type="number" id="opt_jsdr_cutoff" min="1" max="100" value="15" size="4">
+          <input type="number" id="opt_jsdr_cutoff" min="1" max="100" value="15">
           セールとみなすための実質割引率の下限
         </label>
         <label>
