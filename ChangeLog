@@ -1,3 +1,9 @@
+2025-01-24  Tatsuwo  <yto at example.com>
+
+	* firefox/manifest.json: 2.0.10
+
+	* chrome/manifest.json: 2.0.10
+
 2025-01-23  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js:

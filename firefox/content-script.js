@@ -904,12 +904,12 @@ async function kindle_carousel_component() {
             elems.forEach(cntn => {
                 let c = cntn.querySelector('.octopus-pc-asin-info-section');
                 if (c) {
-                    change_background_color(c, jsdr);
                     show_jsdr_badge(cntn, jsdr, "2px", "0");
+                    change_background_color(c, jsdr);
                     return;
                 }
                 show_jsdr_badge(cntn, jsdr, "0", "0");
-                change_background_color(cntn, jsdr);
+                change_background_color(cntn, jsdr, 'g');
             });
         });
 
@@ -1185,7 +1185,7 @@ function change_background_color(e, v, mode = "") { // 0 <= v <= 100
     const rgb = hex2rgb(color_hex).join(',');
     const rgba = `rgba(${rgb},${toumei})`;
     if (mode == 'g') e.style.background =
-        `linear-gradient(${rgba}, 90%, rgba(${rgb},0))`;
+        `linear-gradient(${rgba} 95%, rgba(${rgb},0))`;
     else e.style.backgroundColor = rgba;
     return true;
 }
