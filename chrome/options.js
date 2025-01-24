@@ -23,7 +23,7 @@ const load_options = () =>
           })
       );
 
-const init_options = () => {
+async function init_options() {
     document.querySelectorAll('#option-setting input').forEach(e => {
         if (e.id == 'opt_bgcolor_hex') e.value = '#FF0000';
         else if (e.id == 'opt_jsdr_cutoff') e.value = '15';
@@ -36,7 +36,7 @@ const init_options = () => {
     load_options();
 }
 
-const show_storage = () =>
+const show_storage = async () =>
       chrome.storage.local.get(null, (items) => console.log(items));
 
 async function get_notice() {
@@ -70,9 +70,9 @@ document.addEventListener('DOMContentLoaded', get_notice);
 [...document.querySelectorAll('input')].
     forEach(e => e.addEventListener('change', save_options));
 
-document.getElementById('close_button').addEventListener('click', window.close);
-document.getElementById('init_button').addEventListener('click', init_options);
-document.getElementById('show_button').addEventListener('click', show_storage);
+document.getElementById('close_button').addEventListener('click', () => window.close());
+document.getElementById('init_button').addEventListener('click', () => init_options());
+//document.getElementById('show_button').addEventListener('click', () => show_storage());
 document.getElementById('clear_button').addEventListener('click', () => {
     if (window.confirm("すべての設定をリセットしますか？"))
         chrome.storage.local.clear();
