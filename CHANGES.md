@@ -1,5 +1,11 @@
 # Release notes
 
+## v2.0.10 / 2025-01-24
+- feature: カルーセルにバッジ・背景色を表示
+- feature: storefront ページのカルーセルに対応
+- fix: ASINページ（個別作品ページ）でバッジが出なくなっていたのを修正
+- fix: 著者ページ(Author Page)のレイアウト変更に対応
+
 ## v2.0.9 / 2025-01-14
 - feature: Wishlist のグリッド表示でバッジ・ボタン・背景色を表示
 - fix: Wishlist で割引率が表示されなくなった問題を修正 (by Foo-x)
