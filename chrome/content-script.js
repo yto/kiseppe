@@ -271,7 +271,7 @@ async function main() {
         kindle_carousel_component();
 
     } else if (document.querySelector(
-        '[data-entity-id][data-type=collection], [data-collection-asin]'
+        '[data-asin][data-entity-type=collection]'
     )) {
 
         console_log("kiseppe: here is Kindle Series Page");
@@ -350,7 +350,7 @@ async function main() {
         kindle_carousel_component();
 
     } else {
-
+        console_log("kiseppe: nothing");
     }
 }
 
@@ -658,8 +658,8 @@ async function kindle_grid12_component() {
 async function kindle_series_page() {
 
     // get series ASIN
-    let e = document.querySelector('[data-entity-id][data-type=collection]');
-    let srasin = e?.dataset?.entityId;
+    let e = document.querySelector('[data-asin][data-entity-type=collection]');
+    let srasin = e?.dataset?.asin;
     if (!srasin) {
         e = document.querySelector('[data-collection-asin*="B"]');
         srasin = e?.dataset?.collectionAsin;
@@ -944,14 +944,14 @@ async function kindle_shadowroot_carousel_component() {
             const assignedNodes = slot.assignedNodes({flatten: true});
             //console.log('assignedNodes',assignedNodes);
             const asins = [];
-            const elems2 = [...assignedNodes[0].querySelectorAll('li')];
+            const elems2 = [...assignedNodes[0].querySelectorAll('bds-carousel-item')];
             elems2.forEach(li => {
                 if (li.querySelector('.kiseppe-pg-btn'))
                     return; // button already exists
                 //console.log(li);
                 const e2 = li.querySelector('bds-unified-book-faceout');
                 if (!e2) return;//{console.log('no e2',li); return;}
-                const bi = e2.shadowRoot.querySelector('div.ubf-book-info');
+                const bi = e2.shadowRoot.querySelector('.unified-book-faceout');
                 if (!bi) return;//{console.log('no bi',e2); return;}
                 const at = bi.querySelector('a');
                 if (!at) return;//{console.log('no at',bi); return;}
@@ -1170,7 +1170,7 @@ function put_price_graph_button(e, asin, title, pinfo={}) {
     if (!e || !title) return false;
     const pgd = build_price_graph_dialog(asin, title, pinfo);
     if (getComputedStyle(e).position === "static") {
-	e.style.position = "relative";
+        e.style.position = "relative";
     }
     e.appendChild(pgd);
     return true;
