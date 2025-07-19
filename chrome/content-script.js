@@ -238,8 +238,6 @@ async function main() {
         if (!PROCESS_ON_CAROUSEL) return;
         kindle_carousel_component();
 
-    //} else if (document.querySelector('title') &&
-    //           /一覧.+著者/.test(document.querySelector('title').textContent)) {
     } else if (/\/author\//.test(location.href)) {
 
         console_log("kiseppe: here is Kindle Author Page");
@@ -271,7 +269,8 @@ async function main() {
         kindle_carousel_component();
 
     } else if (document.querySelector(
-        '[data-asin][data-entity-type=collection]'
+        '[id=series-childAsin-widget], [data-parent-asins]'
+        //'[data-asin][data-entity-type=collection]'
     )) {
 
         console_log("kiseppe: here is Kindle Series Page");
@@ -663,6 +662,11 @@ async function kindle_series_page() {
     if (!srasin) {
         e = document.querySelector('[data-collection-asin*="B"]');
         srasin = e?.dataset?.collectionAsin;
+    }
+    if (!srasin) {
+        e = document.querySelector('[data-parent-asins*="B"]');
+        const srasins = e?.dataset?.parentAsins;
+        if (srasins) srasin = srasins.split(",")[0];
     }
     if (!srasin) return;
     //console_log('series asin:', srasin);
@@ -1319,17 +1323,6 @@ function insert_price_graph(asin, pinfo) {
     console_log('kiseppe: insert price graph', asin);
 
     if (document.getElementById('kiseppe')) return false;
-
-/*    //// get hight of iframe (use it later)
-    window.addEventListener('message', function(e) {
-        const iframe = document.getElementById("kiseppe");
-        switch(e.data[0]) { // event name
-        case 'setHeight':
-            iframe.style.height = e.data[1] + "px";
-            break;
-        }
-    }, false);
-*/
 
     //// build API url (returns a web page for iframe)
     // To put the today's point on the graph, API needs price and point.
