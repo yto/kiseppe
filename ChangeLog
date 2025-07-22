@@ -1,3 +1,9 @@
+2025-07-14  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	- シリーズページで適用されなくなったので修正
+	- storefront ページの shadowRoot のカルーセル処理が適応されなくなったので修正
+
 2025-01-25  Tatsuwo  <yto at example.com>
 
 	* memo: v2.0.10 公式公開
