@@ -1,3 +1,12 @@
+2025-08-16  Tatsuwo  <yto at example.com>
+
+	* chrome/content-script.js:
+	7/14の修正が効かない事態に。
+	HTML変更で、大元のKindle関連ページ判定ではじかれていた。
+	Kindle 関連ページか否かの判定ロジックを変更：
+	- 1. 上部横並びメニューの一番左の見出し「Kindle本」（マンガ以外）
+	- 2. 上部横並びメニューの一番左のロゴ「amazon manga」（マンガ）
+
 2025-07-14  Tatsuwo  <yto at example.com>
 
 	* chrome/content-script.js:

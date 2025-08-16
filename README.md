@@ -33,7 +33,7 @@ Additionally, it displays discount information on Kindle search results, author 
   
 ## 作者
 
-[yto](https://twitter.com/yto)
+[yto](https://x.com/yto)
 
 キンセリの開発・運営を行っています
 

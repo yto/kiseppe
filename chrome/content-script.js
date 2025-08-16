@@ -93,36 +93,30 @@ async function main() {
     let is_asin_page = 0;
     let is_wishlist_page = 0;
 
-    // Kindle 関連ページの判定方法: 上のメニューバーの一番左に "Kindle" が含まれる
-    // PC page: #nav-subnav a[aria-label]
-    // SP page(manga): #manga-mobile-subnav a[aria-label]
-    //chk += document.querySelector('#nav-subnav .nav-a-content')?.textContent;
+    //// Kindle 関連ページか否かの判定
+    // 1. 上部横並びメニューの一番左の見出し「Kindle本」（マンガ以外）
     let chk = document.querySelector('#nav-subnav a[aria-label]')?.textContent;
-    //chk += document.querySelector('#manga-mobile-subnav a[aria-label]')?.textContent;
-    //if (/Kindle|Fliptoon/.test(chk)) ok_flag = 1;
-
+    // 2. 上部横並びメニューの一番左のロゴ「amazon manga」（マンガ）
+    chk += document.querySelector('#nav-subnav a')?.innerHTML;
+    if (/Kindle|Amazon マンガ/.test(chk)) ok_flag = 1;
+    
     if (document.querySelector('#tmm-grid-swatch-KINDLE,#tmm-grid-swatch-OTHER')?.classList.contains('selected')) {
         // ASIN page 判定 (PC/SP 共通)
-        ok_flag = 1;
         is_asin_page = 1;
         console.log('judged: PC/SP ASIN page');
     } else if (/ほしい物リスト/.test(
         document.querySelector('meta[property="og:title"]')?.getAttribute('content')
     )) {
         // ほしい物リストページの判定 (PC/SP 共通)
-        // <meta property="og:title" content="Amazonほしい物リストを一緒に編集しましょう">
-        //chk = document.querySelector('meta[property="og:title"]')?.getAttribute('content');
-        //if (/ほしい物リスト/.test(chk)) {
-        ok_flag = 1;
         is_wishlist_page = 1;
         console.log('judged: PC/SP wishlist');
-        //}
-    } else if (/Kindle|Fliptoon/.test(chk)) {
+    } else if (ok_flag) {
+        // Kindle 関連ページの判定
         console.log('judged: a page in kindle store');
     } else {
+        // Kindle 関連ページではないので以降の処理は行わない
         return;
     }
-    //if (!ok_flag) return;
 
     // options
     storage_items = await new Promise(r => chrome.storage.local.get(null, r)).
