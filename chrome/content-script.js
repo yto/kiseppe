@@ -938,7 +938,7 @@ async function kindle_carousel_component() {
 // bds-* (Web Components) で表示される本 (2026-11 時点)
 // - 本1冊が bds-unified-book-faceout で、リンク (/dp/B...) はその shadowRoot の中
 // - bds-carousel-item と bds-unified-book-faceout 自体は通常の DOM にある
-// - 価格・ポイントは shadowRoot から取れていないので、API 側の値で判定する
+// - 価格・ポイントは shadowRoot のさらに内側 (bds-book-price, bds-book-points) から取る
 // Ex. https://www.amazon.co.jp/amz-books/store?node=2275256051 (ストアトップ)
 // Ex. https://www.amazon.co.jp/stores/.../author/B004L41ULY (著者ページ)
 // Ex. https://www.amazon.co.jp/hko/deals/ (セール一覧)
@@ -961,7 +961,7 @@ async function kindle_bds_component() {
         if (!asin) return;
         const item_title = a.querySelector('bds-book-cover-image')
               ?.getAttribute('coverimagealttext') ?? '';
-        const pinfo = {'price': undefined, 'point': undefined};
+        const pinfo = extract_price_and_point_bds(f);
         a2pinfo[asin] = pinfo;
         asins.push(asin);
         cntn.dataset.ks_asin = asin;
@@ -992,6 +992,25 @@ async function kindle_bds_component() {
     }
 
     return;
+}
+
+
+// bds-unified-book-faceout から価格とポイントを取る
+// - 価格: shadowRoot 内の bds-book-price の shadowRoot (例: "￥ 990 ￥990")
+//   セール時は先頭がセール価格 (例: "-90% ¥99 紙の本の価格: ¥990")
+// - ポイント: 同じく bds-book-points (例: "10ポイント(1%)")
+// ¥0 は Kindle Unlimited (kindle+) か無料か区別できないので使わない
+//   (get_jsdr() に 0 を渡すと実質 100% オフと計算されてしまう)
+function extract_price_and_point_bds(f) {
+    const sr = f?.shadowRoot;
+    const pr_txt = sr?.querySelector('bds-book-price')?.shadowRoot?.textContent ?? '';
+    const po_txt = sr?.querySelector('bds-book-points')?.shadowRoot?.textContent ?? '';
+    let price = (pr_txt.match(/[￥¥]\s*(\d{1,3}(,\d{3})*)/) || [])[1]?.replace(/,/g, '');
+    let point = (po_txt.match(/(\d[\d,]*)\s*(ポイント|pt)/) || [])[1]?.replace(/,/g, '');
+    if (!price || price === '0') price = undefined;
+    if (price === undefined) point = undefined;
+    console_log('bds price-point', price, point);
+    return {'price': price, 'point': point};
 }
 
 
