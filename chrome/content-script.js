@@ -931,6 +931,7 @@ async function kindle_carousel_component() {
                     return;
                 }
                 show_jsdr_badge(cntn, jsdr, "0", "0");
+                align_badge_to_cover(cntn);
                 change_background_color(cntn, jsdr, 'g');
             });
         });
@@ -1253,6 +1254,25 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
 
 // build and put a "this series has discounted items" badge
 // "シリーズにセール作品があるよ" バッジ
+// バッジを表紙画像 (カード内で一番背の高い img) の右上の角に合わせる
+// マンガストアなどのカルーセルでは表紙がカードの上端から 10px〜32px 下にあり、
+// 上に kindle+ のロゴが入るカードもある。カードの右上だとバッジが表紙から
+// 浮いてロゴに重なるため (2026-11)
+function align_badge_to_cover(cntn) {
+    const b = cntn?.querySelector('.kiseppe-jsdr-badge');
+    if (!b) return;
+    let img = null;
+    let h = 0;
+    cntn.querySelectorAll('img').forEach(i => {
+        const ih = i.getBoundingClientRect().height;
+        if (ih > h) { h = ih; img = i; }
+    });
+    if (!img) return; // 画像が未読み込みなどで高さ 0 ならカードの右上のまま
+    const cr = cntn.getBoundingClientRect();
+    const ir = img.getBoundingClientRect();
+    b.style.top = Math.max(0, Math.round(ir.top - cr.top)) + 'px';
+    b.style.right = Math.max(0, Math.round(cr.right - ir.right)) + 'px';
+}
 function show_series_sale_badge(e) {
     if (!e) return false;
     const class_name = 'kiseppe-series-sale-badge';
