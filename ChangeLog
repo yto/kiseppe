@@ -1,5 +1,18 @@
 2026-11-15  Tatsuwo  <yto at example.com>
 
+	* chrome/content-script.js:
+	ストアトップ・著者ページ・セール一覧が bds-* (Web Components) に
+	変わってバッジ・ボタンが出なくなっていたので対応。
+	- kindle_bds_component(): bds-unified-book-faceout をページ全体から
+	拾う汎用の処理。旧 kindle_shadowroot_carousel_component()
+	(kindle-dbs/storefront 用) を置き換えた。storefront は
+	amz-books/store に転送されるようになった。
+	- amz-books/store を Kindle 関連ページと判定するようにした。
+	- マンガストアが /manga/store に移ったので判定に追加。
+	監視対象の .msw-page が無いので body で代用。
+	- ASIN ページ判定と価格取得に inline-twister レイアウトを追加
+	(issue #5 の提案どおり。手元では新レイアウトが出ず未確認)。
+
 	* firefox/: 丸ごとコピーをやめ、差分 manifest-overrides.json だけにした。
 
 	* build.sh: 追加。chrome/ から dist/chrome, dist/firefox と

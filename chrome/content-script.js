@@ -28,8 +28,8 @@
 //   - Kindle Carousel Component
 //   - Kindle Grid12 Component
 //     - observe
-// - Kindle Store Front Page
-//   - Kindle shadowRoot Carousel Component
+// - Pages with bds components (Store Top, Author, Deals, Books Store)
+//   - Kindle bds Component
 //     - observe
 // - Kindle Manga Store Page
 //   - Kindle Carousel Component
@@ -56,9 +56,8 @@
 //     - [price-graph-button]
 //   - Manga Store Ranking Carousel
 //     - [price-graph-button]
-// - Kindle shadowRoot Carousel Component
-//   - Kindle Store Front Page
-//     - [price-graph-button]
+// - Kindle bds Component
+//   - [price-graph-button][item-jsdr]
 //
 // Words
 // - KS means Kiseppe or Kinseli
@@ -99,8 +98,17 @@ async function main() {
     // 2. 上部横並びメニューの一番左のロゴ「amazon manga」（マンガ）
     chk += document.querySelector('#nav-subnav a')?.innerHTML;
     if (/Kindle|Amazon マンガ/.test(chk)) ok_flag = 1;
-    
-    if (document.querySelector('#tmm-grid-swatch-KINDLE,#tmm-grid-swatch-OTHER')?.classList.contains('selected')) {
+    // 3. 書籍ストア（旧 kindle-dbs/storefront の転送先を含む。紙の本と混在するが、
+    //    API は B で始まる ASIN しか返さないので紙の本は自然に除外される）
+    if (location.pathname.startsWith('/amz-books/store')) ok_flag = 1;
+
+    // ASIN ページで選択中のフォーマット
+    // 旧レイアウト: #tmm-grid-swatch-KINDLE / 新レイアウト(inline-twister, issue #5)
+    const is_kindle_format_selected =
+          document.querySelector('#tmm-grid-swatch-KINDLE,#tmm-grid-swatch-OTHER')?.classList.contains('selected') ||
+          /Kindle版|電子書籍/.test(document.querySelector('#inline-twister-row-media_format .a-button-selected')?.textContent ?? '');
+
+    if (is_kindle_format_selected) {
         // ASIN page 判定 (PC/SP 共通)
         is_asin_page = 1;
         console.log('judged: PC/SP ASIN page');
@@ -167,6 +175,23 @@ async function main() {
         const f2 = generate_callback(e, f);
         f2(mutations, observer);
     };
+
+    // bds-* (Web Components) で本を表示するページ
+    // ストアトップ・著者ページ・セール一覧・書籍ストアなど (2026-11 時点)
+    // 下の分岐とは独立に処理する（同じページに従来のカルーセルが混在するため）
+    if (PROCESS_ON_CAROUSEL && !is_asin_page && !is_wishlist_page &&
+        !storage_items?.opt_asin_page_only &&
+        document.querySelector('bds-unified-book-faceout')) {
+
+        console_log("kiseppe: here is a page with bds components");
+        await kindle_bds_component();
+
+        // カルーセルは後から読み込まれるので html ごと監視する
+        const e = document.querySelector('html');
+        const callback = generate_callback(e, kindle_bds_component);
+        const observer = new MutationObserver(callback);
+        observer.observe(e, config);
+    }
 
     if (is_wishlist_page) {
 
@@ -303,27 +328,17 @@ async function main() {
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
 
-    } else if (/kindle-dbs\/storefront/.test(location.href)) {
-
-        console_log("kiseppe: here is Kindle Store Front Page");
-
-        if (!PROCESS_ON_CAROUSEL) return;
-        await kindle_shadowroot_carousel_component();
-
-        const e = document.querySelector('html');
-        console.assert(e);
-        const callback = generate_callback(e, kindle_shadowroot_carousel_component);
-        const observer = new MutationObserver(callback);
-        observer.observe(e, config);
-
-    } else if (/manga-store/.test(location.href)) {
+    } else if (/manga-store/.test(location.href) ||
+               location.pathname.startsWith('/manga/store')) {
+        // 2026-11 時点で /kindle-dbs/manga-store/ から /manga/store に移った
 
         console_log("kiseppe: here is Kindle Manga Store Page");
 
         if (!PROCESS_ON_CAROUSEL) return;
         await kindle_carousel_component();
 
-        const e = document.querySelector('.msw-page');
+        // .msw-page は /manga/store には無い
+        const e = document.querySelector('.msw-page') ?? document.body;
         console.assert(e);
         const callback = generate_callback_ex(
             e,
@@ -372,7 +387,9 @@ async function kindle_asin_page() {
     //const pinfo = extract_price_and_point(document.querySelector('#MediaMatrix'));
     const pinfo = extract_price_and_point(
         //document.querySelector('#mediamatrix_feature_div')
-        document.querySelector('#mediamatrix_feature_div .selected')
+        document.querySelector('#mediamatrix_feature_div .selected') ??
+            // 新レイアウト (inline-twister, issue #5)
+            document.querySelector('#inline-twister-row-media_format .a-button-selected')
     );
     
     // call kiseppe 1.0 (kiseppe1.0::main() => insert_price_graph())
@@ -917,77 +934,59 @@ async function kindle_carousel_component() {
     return;
 }
 
-//// Kindle shadowRoot Carousel Component
-async function kindle_shadowroot_carousel_component() {
+//// Kindle bds Component
+// bds-* (Web Components) で表示される本 (2026-11 時点)
+// - 本1冊が bds-unified-book-faceout で、リンク (/dp/B...) はその shadowRoot の中
+// - bds-carousel-item と bds-unified-book-faceout 自体は通常の DOM にある
+// - 価格・ポイントは shadowRoot から取れていないので、API 側の値で判定する
+// Ex. https://www.amazon.co.jp/amz-books/store?node=2275256051 (ストアトップ)
+// Ex. https://www.amazon.co.jp/stores/.../author/B004L41ULY (著者ページ)
+// Ex. https://www.amazon.co.jp/hko/deals/ (セール一覧)
+// 旧 kindle_shadowroot_carousel_component() (kindle-dbs/storefront 用) を置き換えた
+async function kindle_bds_component() {
 
-    // Kindle Store Front Page
-    // Ex. https://www.amazon.co.jp/kindle-dbs/storefront
-    if (/kindle-dbs\/storefront/.test(location.href)) {
-        console_log('kiseppe: > storefront carousel');
-        
-        console_log("wait a few seconds");
-        await sleep(1000);
-        console_log("ok, go!");
+    const a2pinfo = {};
+    const asins = [];
 
-        //const qs_cs = 'div[id^="unified-ebooks-storefront-default_"]';
-        const qs_cs = 'div.celwidget';
-        const a2pinfo = {};
-        const asinss = [];
-        const elems1 = [...document.querySelectorAll(qs_cs)];
-        elems1.forEach(ca => {
-            //console.log('ca',ca);
-            const e = ca.querySelector('bds-render-context-provider');
-            if (!e) return;
-            const slot = e.shadowRoot.querySelector('slot');
-            const assignedNodes = slot.assignedNodes({flatten: true});
-            //console.log('assignedNodes',assignedNodes);
-            const asins = [];
-            const elems2 = [...assignedNodes[0].querySelectorAll('bds-carousel-item')];
-            elems2.forEach(li => {
-                if (li.querySelector('.kiseppe-pg-btn'))
-                    return; // button already exists
-                //console.log(li);
-                const e2 = li.querySelector('bds-unified-book-faceout');
-                if (!e2) return;//{console.log('no e2',li); return;}
-                const bi = e2.shadowRoot.querySelector('.unified-book-faceout');
-                if (!bi) return;//{console.log('no bi',e2); return;}
-                const at = bi.querySelector('a');
-                if (!at) return;//{console.log('no at',bi); return;}
-                const asin = get_asin_in_href(at);
-                const item_title = at.querySelector('bds-book-cover-image').getAttribute('coverimagealttext');
-                const pinfo = {'price':undefined, 'point':undefined};
-                a2pinfo[asin] = pinfo;
-                //console.log(bi, asin, item_title, pinfo);
-                asins.push(asin);
-                li.dataset.ks_asin = asin;
-                
-                put_price_graph_button(li, asin, item_title, pinfo);
+    document.querySelectorAll('bds-unified-book-faceout').forEach(f => {
+        const cntn = f.closest('bds-carousel-item') || f.parentElement;
+        if (!cntn || cntn.querySelector('.kiseppe-pg-btn'))
+            return; // button already exists
+        const a = f.shadowRoot?.querySelector('a[href*="/dp/B"]');
+        if (!a) return;
+        const asin = (a.getAttribute('href').match(/\/dp\/(B[0-9A-Z]{9})/) || [])[1];
+        if (!asin) return;
+        const item_title = a.querySelector('bds-book-cover-image')
+              ?.getAttribute('coverimagealttext') ?? '';
+        const pinfo = {'price': undefined, 'point': undefined};
+        a2pinfo[asin] = pinfo;
+        asins.push(asin);
+        cntn.dataset.ks_asin = asin;
+        put_price_graph_button(cntn, asin, item_title, pinfo);
+    });
+    console_log('kiseppe: > bds faceouts', asins.length);
+
+    // API access (URL が長くなりすぎないように分ける)
+    const chunk_size = 40;
+    for (let i = 0; i < asins.length; i += chunk_size) {
+        const res = await access_api_params(asins.slice(i, i + chunk_size).join(","));
+
+        // display jsdr information
+        Object.keys(res?.result?.books || []).forEach(asin => {
+            const jsdr = get_jsdr(asin, res, a2pinfo);
+            if (jsdr < JSDR_CUTOFF) return;
+            const elems = [...document.querySelectorAll(`[data-ks_asin="${asin}"]`)];
+            elems.forEach(cntn => {
+                if (cntn.querySelector('.kiseppe-jsdr-badge')) return;
+                show_jsdr_badge(cntn, jsdr, "0", "0");
+                change_background_color(cntn, jsdr);
             });
-            if (asins.length > 0) asinss.push(asins);
         });
 
-        for (const i in asinss) {
-            const asins = asinss[i];
-
-            // API access
-            const res = await access_api_params(asins.join(","));
-
-            // display jsdr information
-            Object.keys(res?.result?.books || []).forEach(asin => {
-                const jsdr = get_jsdr(asin, res, a2pinfo);
-                if (jsdr < JSDR_CUTOFF) return;
-                const elems = [...document.querySelectorAll(`[data-ks_asin="${asin}"]`)];
-                elems.forEach(cntn => {
-                    show_jsdr_badge(cntn, jsdr, "0", "0");
-                    change_background_color(cntn, jsdr);
-                });
-            });
-
-            await sleep(700);
-        }
-
-        return;
+        await sleep(700);
     }
+
+    return;
 }
 
 
