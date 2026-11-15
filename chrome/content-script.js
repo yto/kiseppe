@@ -885,10 +885,17 @@ async function kindle_carousel_component() {
     // ASIN page: %2Fdp%2FB00JGI56B0%2F
     // 横並びだけどスクロールしないやつ
     // Ex. https://www.amazon.co.jp/b?node=2292699051
+    // スマホ表示のマンガストアは a-carousel-row-inner が本を含まず、
+    // div.a-carousel-viewport > ol.a-carousel > li.a-carousel-card の形 (2026-11 に確認)。
+    // PC で a-carousel-row-inner の内側にある viewport は二重に拾わないよう除く
     const qs_carousel =
           'div[class*="a-carousel-row-inner"], ' +
-          'div[class*="octopus-pc-card-content"]';
-    const elems1 = [...document.querySelectorAll(qs_carousel)];
+          'div[class*="octopus-pc-card-content"], ' +
+          'div.a-carousel-viewport';
+    const elems1 = [...document.querySelectorAll(qs_carousel)].filter(ca =>
+        !ca.matches('div.a-carousel-viewport') ||
+        !ca.parentElement?.closest('div[class*="a-carousel-row-inner"], div[class*="octopus-pc-card-content"]')
+    );
     elems1.forEach(ca => {
         if (ca.querySelector('img[alt="likes icon"]'))
             return; // manga-store mateba-muryou's "likes" icon
