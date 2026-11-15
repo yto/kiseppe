@@ -3,3 +3,6 @@
 
 # 作業メモ（private リポ yto/kiseppe-notes を clone して置く）
 notes/
+
+# build.sh の出力
+dist/

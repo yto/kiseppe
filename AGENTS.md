@@ -4,8 +4,11 @@
 
 ## 構成
 
-- `chrome/` が本体。`firefox/` は `chrome/` を手作業でコピーしたもの
-- 2つの差分は `manifest.json` の `browser_specific_settings` だけ（2026-11-15 時点）。コードを直すのは `chrome/` 側で、そのあと `firefox/` にコピーする
+- `chrome/` が本体。コードはここだけを直す。Chrome にはこのフォルダをそのまま「パッケージ化されていない拡張機能」として読み込める
+- `firefox/` には Firefox 版との差分だけを置く。今は `manifest-overrides.json`（`browser_specific_settings`）だけ
+- `./build.sh` で `dist/chrome/` と `dist/firefox/` を作り、ストア提出用の zip（`dist/kiseppe-{chrome,firefox}-<version>.zip`）を出す。firefox 版の `manifest.json` は `chrome/manifest.json` に `firefox/manifest-overrides.json` を jq で重ねたもの
+- Firefox で動作確認するときは、`./build.sh` のあと `about:debugging` から `dist/firefox/manifest.json` を一時的に読み込む
+- バージョンは `chrome/manifest.json` の1か所だけ直せばよい
 - 開発の記録は `ChangeLog`、リリースノートは `CHANGES.md`
 
 ## このリポジトリは public
