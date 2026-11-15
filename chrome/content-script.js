@@ -419,10 +419,14 @@ async function kindle_asin_page() {
     }
     const jsdr = get_jsdr(asin, res, {asin: pinfo});
     if (jsdr < JSDR_CUTOFF) return;
-    const x = document.querySelector('#leftCol'); // '#imageBlock'
+    // 背景色を付ける範囲とバッジを付ける表紙の入れ物
+    // PC: #leftCol / #imageBlock .a-fixed-left-grid
+    // スマホ (a-touch): .image-wrapper / #landing-image-wrapper (2026-11 に確認)
+    const sp_cover = document.querySelector('#landing-image-wrapper');
+    const x = document.querySelector('#leftCol') ?? sp_cover?.closest('.image-wrapper');
     change_background_color(x, jsdr, 'g');
-    // #leftCol は PC 表示にしか無い (スマホ表示では null)
-    const x2 = x?.querySelector('div#imageBlock .a-fixed-left-grid');
+    const x2 = document.querySelector('#leftCol div#imageBlock .a-fixed-left-grid') ?? sp_cover;
+    if (x2 && getComputedStyle(x2).position === 'static') x2.style.position = 'relative';
     show_jsdr_badge(x2, jsdr, "0", "0");
     // 表紙の右上には Amazon の共有・お気に入りボタンがあって重なるので左上に置く (2026-11)
     const b = x2?.querySelector('.kiseppe-jsdr-badge');
