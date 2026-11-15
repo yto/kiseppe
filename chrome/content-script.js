@@ -421,7 +421,8 @@ async function kindle_asin_page() {
     if (jsdr < JSDR_CUTOFF) return;
     const x = document.querySelector('#leftCol'); // '#imageBlock'
     change_background_color(x, jsdr, 'g');
-    const x2 = x.querySelector('div#imageBlock .a-fixed-left-grid');
+    // #leftCol は PC 表示にしか無い (スマホ表示では null)
+    const x2 = x?.querySelector('div#imageBlock .a-fixed-left-grid');
     show_jsdr_badge(x2, jsdr, "0", "0");
     // 表紙の右上には Amazon の共有・お気に入りボタンがあって重なるので左上に置く (2026-11)
     const b = x2?.querySelector('.kiseppe-jsdr-badge');
