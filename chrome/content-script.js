@@ -949,6 +949,9 @@ async function kindle_bds_component() {
     const asins = [];
 
     document.querySelectorAll('bds-unified-book-faceout').forEach(f => {
+        // シリーズのカード (著者ページの「シリーズ別ショップ」など) は対象外。
+        // 本のカードは data-csa-c-binding が "Kindle版" などで、シリーズは "NULL"
+        if (f.getAttribute('data-csa-c-binding') === 'NULL') return;
         const cntn = f.closest('bds-carousel-item') || f.parentElement;
         if (!cntn || cntn.querySelector('.kiseppe-pg-btn'))
             return; // button already exists
