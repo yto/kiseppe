@@ -977,8 +977,14 @@ async function kindle_bds_component() {
 
     document.querySelectorAll('bds-unified-book-faceout').forEach(f => {
         // シリーズのカード (著者ページの「シリーズ別ショップ」など) は対象外。
-        // 本のカードは data-csa-c-binding が "Kindle版" などで、シリーズは "NULL"
-        if (f.getAttribute('data-csa-c-binding') === 'NULL') return;
+        // シリーズは data-csa-c-binding が "NULL" だが、kindle+ のページ
+        // (/kindle-dbs/hz/bookshelf) では本のカードも "NULL" になっている (2026-11 に確認)。
+        // そこで枠の種類 (strategy-id、著者ページは "SeriesByAuthor") か
+        // 品目の種類 (item-type、本は "asin") も見る
+        if (f.getAttribute('data-csa-c-binding') === 'NULL' && (
+            /Series/i.test(f.getAttribute('data-csa-c-strategy-id') ?? '') ||
+            (f.getAttribute('data-csa-c-item-type') ?? 'asin') !== 'asin'
+        )) return;
         const cntn = f.closest('bds-carousel-item') || f.parentElement;
         if (!cntn || cntn.querySelector('.kiseppe-pg-btn'))
             return; // button already exists
