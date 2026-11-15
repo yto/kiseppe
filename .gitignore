@@ -1,0 +1,5 @@
+# ストア提出用に手作業で作る zip
+*.zip
+
+# 作業メモ（private リポ yto/kiseppe-notes を clone して置く）
+notes/
