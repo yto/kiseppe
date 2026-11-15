@@ -421,9 +421,10 @@ async function kindle_asin_page() {
     if (jsdr < JSDR_CUTOFF) return;
     // 背景色を付ける範囲とバッジを付ける表紙の入れ物
     // PC: #leftCol / #imageBlock .a-fixed-left-grid
-    // スマホ (a-touch): .image-wrapper / #landing-image-wrapper (2026-11 に確認)
+    // スマホ (a-touch): バッジだけ。#landing-image-wrapper (2026-11 に確認)
+    //   表紙の入れ物は表紙と同じ大きさで、背景色を付けても表紙に隠れて見えないため
     const sp_cover = document.querySelector('#landing-image-wrapper');
-    const x = document.querySelector('#leftCol') ?? sp_cover?.closest('.image-wrapper');
+    const x = document.querySelector('#leftCol');
     change_background_color(x, jsdr, 'g');
     const x2 = document.querySelector('#leftCol div#imageBlock .a-fixed-left-grid') ?? sp_cover;
     if (x2 && getComputedStyle(x2).position === 'static') x2.style.position = 'relative';
