@@ -992,6 +992,7 @@ async function kindle_bds_component() {
             elems.forEach(cntn => {
                 if (cntn.querySelector('.kiseppe-jsdr-badge')) return;
                 show_jsdr_badge(cntn, jsdr, "0", "0");
+                align_badge_to_cover(cntn);
                 change_background_color(cntn, jsdr);
             });
         });
@@ -1254,7 +1255,7 @@ function show_jsdr_badge(e, jsdr, xp, yp) {
 
 // build and put a "this series has discounted items" badge
 // "シリーズにセール作品があるよ" バッジ
-// バッジを表紙画像 (カード内で一番背の高い img) の右上の角に合わせる
+// バッジを表紙画像 (カード内で一番背の高い img か bds-book-cover-image) の右上の角に合わせる
 // マンガストアなどのカルーセルでは表紙がカードの上端から 10px〜32px 下にあり、
 // 上に kindle+ のロゴが入るカードもある。カードの右上だとバッジが表紙から
 // 浮いてロゴに重なるため (2026-11)
@@ -1263,7 +1264,14 @@ function align_badge_to_cover(cntn) {
     if (!b) return;
     let img = null;
     let h = 0;
-    cntn.querySelectorAll('img').forEach(i => {
+    // bds-* のカードは表紙が shadowRoot の中 (bds-book-cover-image)
+    const covers = [
+        ...cntn.querySelectorAll('img'),
+        ...[...cntn.querySelectorAll('bds-unified-book-faceout')]
+            .map(f => f.shadowRoot?.querySelector('bds-book-cover-image'))
+            .filter(Boolean),
+    ];
+    covers.forEach(i => {
         const ih = i.getBoundingClientRect().height;
         if (ih > h) { h = ih; img = i; }
     });
