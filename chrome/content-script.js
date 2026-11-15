@@ -962,6 +962,8 @@ async function kindle_bds_component() {
         a2pinfo[asin] = pinfo;
         asins.push(asin);
         cntn.dataset.ks_asin = asin;
+        // ボタンを右下に置く (左下だと最終行のポイント表示に重なるため。kiseppe.css)
+        cntn.classList.add('kiseppe-bds-item');
         put_price_graph_button(cntn, asin, item_title, pinfo);
     });
     console_log('kiseppe: > bds faceouts', asins.length);

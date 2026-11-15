@@ -49,6 +49,11 @@
     color: rgba(0,0,0,0.9);
     /* animation: zoomin_bottom_left 1.5s; */
 }
+/* bds-* のカードでは左下が価格・ポイントの行と重なるので右下に置く */
+.kiseppe-bds-item > .kiseppe-pg-btn {
+    left: auto;
+    right: 0;
+}
 
 /*
   price graph popup
