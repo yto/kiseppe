@@ -986,9 +986,12 @@ async function kindle_bds_component() {
     console_log('kiseppe: > bds faceouts', asins.length);
 
     // API access (URL が長くなりすぎないように分ける)
+    // 同じ本が複数のカルーセルに出ることがあるので重複を除く
+    // (ストアトップで 183 冊中 5 冊が重複していた。2026-11)
+    const uniq_asins = [...new Set(asins)];
     const chunk_size = 40;
-    for (let i = 0; i < asins.length; i += chunk_size) {
-        const res = await access_api_params(asins.slice(i, i + chunk_size).join(","));
+    for (let i = 0; i < uniq_asins.length; i += chunk_size) {
+        const res = await access_api_params(uniq_asins.slice(i, i + chunk_size).join(","));
 
         // display jsdr information
         Object.keys(res?.result?.books || []).forEach(asin => {
