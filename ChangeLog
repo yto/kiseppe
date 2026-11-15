@@ -12,6 +12,26 @@
 	監視対象の .msw-page が無いので body で代用。
 	- ASIN ページ判定と価格取得に inline-twister レイアウトを追加
 	(issue #5 の提案どおり。手元では新レイアウトが出ず未確認)。
+	- bds-* のカード: シリーズのカードにはボタンを出さない
+	(data-csa-c-binding が NULL で、strategy-id に Series を含むか
+	item-type が asin 以外のもの)。kindle+ のページ
+	(/kindle-dbs/hz/bookshelf) は本のカードも binding が NULL なので、
+	binding だけでは判定しない。
+	- bds-* のカード: shadowRoot 内の bds-book-price / bds-book-points
+	から価格・ポイントを取る (extract_price_and_point_bds())。¥0 は
+	kindle+ か無料か区別できないので使わない。
+	- bds-* の API 問い合わせで ASIN の重複を除く。
+	- バッジの位置: ASIN ページは表紙の左上 (右上の共有・ハートの
+	アイコンと重なるため)。カルーセルと bds-* のカードは表紙の右上の角に
+	合わせる (align_badge_to_cover())。
+	- スマホ表示 (a-touch):
+	ASIN ページで #leftCol が無くても例外にしない。バッジを
+	#landing-image-wrapper に出す (背景色は付けない)。
+	#nav-subnav が無いので、検索結果は検索フォームの隠し項目
+	i=digital-text、マンガストアは /manga/store の URL で判定する。
+	マンガストアのカルーセル (div.a-carousel-viewport) も拾う。
+
+	* chrome/kiseppe.css: bds-* のカードのグラフボタンを右下に置く。
 
 	* firefox/: 丸ごとコピーをやめ、差分 manifest-overrides.json だけにした。
 
