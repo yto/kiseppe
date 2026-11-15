@@ -101,6 +101,13 @@ async function main() {
     // 3. 書籍ストア（旧 kindle-dbs/storefront の転送先を含む。紙の本と混在するが、
     //    API は B で始まる ASIN しか返さないので紙の本は自然に除外される）
     if (location.pathname.startsWith('/amz-books/store')) ok_flag = 1;
+    // 4. スマホ表示 (a-touch) には #nav-subnav が無い (2026-11 に確認) ので URL や検索フォームで見る
+    //    マンガストア (/manga/store) と、Kindle ストア内の検索 (隠し項目 i=digital-text)
+    if (location.pathname.startsWith('/manga/store')) ok_flag = 1;
+    const is_kindle_search = !!document.querySelector('div#search') && !!(
+        document.querySelector('div#nav-subnav[data-category="digital-text"]') ||
+        document.querySelector('form input[type="hidden"][name="i"][value="digital-text"]'));
+    if (is_kindle_search) ok_flag = 1;
 
     // ASIN ページで選択中のフォーマット
     // 旧レイアウト: #tmm-grid-swatch-KINDLE / 新レイアウト(inline-twister, issue #5)
@@ -305,8 +312,7 @@ async function main() {
         const observer = new MutationObserver(callback);
         observer.observe(e, config);
 
-    } else if (document.querySelector('div#nav-subnav[data-category="digital-text"]') &&
-               document.querySelector('div#search')) {
+    } else if (is_kindle_search) {
 
         console_log("kiseppe: here is Kindle Search Page");
         await kindle_search_page();
