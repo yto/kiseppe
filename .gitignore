@@ -7,3 +7,4 @@ notes/
 # build.sh の出力
 dist/
 web-ext-artifacts/
+.DS_Store
